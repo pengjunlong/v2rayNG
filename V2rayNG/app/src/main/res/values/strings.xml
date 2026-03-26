@@ -290,6 +290,10 @@
     <string name="sub_setting_next_profile">Next proxy config remarks</string>
     <string name="sub_setting_pre_profile_tip">The config remarks exist and are unique</string>
     <string name="title_sub_update">Update subscription</string>
+    <string name="title_sub_update_and_test_and_sort">Update, test &amp; sort</string>
+    <string name="toast_sub_update_and_test_and_sort_start">Updating subscription, then testing and sorting…</string>
+    <string name="toast_sub_update_done_testing">Subscription updated, now testing real delay…</string>
+    <string name="toast_sort_done">Sorted by test results</string>
     <string name="title_ping_all_server">Tcping config</string>
     <string name="title_real_ping_all_server">Real delay config</string>
     <string name="title_user_asset_setting">Asset files</string>
@@ -342,6 +346,7 @@
     <string name="connection_connected">Connected, tap to check connection</string>
     <string name="connection_not_connected">Not connected</string>
     <string name="connection_runing_task_left">Number of running test tasks: %s</string>
+    <string name="connection_test_progress">Testing: %1$s / %2$s</string>
 
     <string name="import_subscription_success">Subscription imported Successfully</string>
     <string name="import_subscription_failure">Import subscription failed</string>

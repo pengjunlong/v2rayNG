@@ -283,6 +283,10 @@
     <string name="sub_setting_next_profile">落地代理配置別名</string>
     <string name="sub_setting_pre_profile_tip">请确保配置别名存在并唯一</string>
     <string name="title_sub_update">更新订阅</string>
+    <string name="title_sub_update_and_test_and_sort">更新订阅并测试排序</string>
+    <string name="toast_sub_update_and_test_and_sort_start">正在更新订阅，之后将测试并排序…</string>
+    <string name="toast_sub_update_done_testing">订阅已更新，开始测试真连接…</string>
+    <string name="toast_sort_done">已按测试结果排序完成</string>
     <string name="title_ping_all_server">测试配置 Tcping</string>
     <string name="title_real_ping_all_server">测试配置真连接</string>
     <string name="title_user_asset_setting">资源文件</string>
@@ -327,6 +331,7 @@
     <string name="connection_connected">"已连接，点击测试连接"</string>
     <string name="connection_not_connected">"未连接"</string>
     <string name="connection_runing_task_left">运行中的测试任务数：%s</string>
+    <string name="connection_test_progress">测试中：%1$s / %2$s 个</string>
 
     <string name="import_subscription_success">订阅导入成功</string>
     <string name="import_subscription_failure">导入订阅失败</string>

@@ -48,6 +48,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val updateTestResultAction by lazy { MutableLiveData<String>() }
     private val tcpingTestScope by lazy { CoroutineScope(Dispatchers.IO) }
 
+    /** One-shot callback invoked when the batch real-ping test finishes (content == "0"). */
+    var onTestsFinishedCallback: (() -> Unit)? = null
+
     /**
      * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):
      * `registerReceiver(Context, BroadcastReceiver, IntentFilter, int)`.
@@ -436,6 +439,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             withContext(Dispatchers.Main) {
                 reloadServerList()
+                // Invoke and clear the one-shot callback (e.g. from "update→test→sort" action)
+                val callback = onTestsFinishedCallback
+                onTestsFinishedCallback = null
+                callback?.invoke()
             }
         }
     }
@@ -476,9 +483,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
-                    val content = intent.getStringExtra("content")
+                    val content = intent.getStringExtra("content") ?: return
+                    // content is "done/total", e.g. "3/100"
+                    val parts = content.split("/")
+                    val done = parts.getOrNull(0)?.trim() ?: content
+                    val total = parts.getOrNull(1)?.trim() ?: ""
                     updateTestResultAction.value =
-                        getApplication<AngApplication>().getString(R.string.connection_runing_task_left, content)
+                        getApplication<AngApplication>().getString(R.string.connection_test_progress, done, total)
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
