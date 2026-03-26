@@ -94,6 +94,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         })
 
         binding.fab.setOnClickListener { handleFabAction() }
+        binding.fabLocate.setOnClickListener { updateSubscriptionThenTestAndSort() }
         binding.layoutTest.setOnClickListener { handleLayoutTestClick() }
 
         setupGroupTab()
@@ -339,6 +340,11 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             true
         }
 
+        R.id.sub_update_and_test_and_sort -> {
+            updateSubscriptionThenTestAndSort()
+            true
+        }
+
         R.id.locate_selected_config -> {
             locateSelectedServer()
             true
@@ -543,6 +549,47 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             launch(Dispatchers.Main) {
                 mainViewModel.reloadServerList()
                 hideLoading()
+            }
+        }
+    }
+
+    /**
+     * Sequentially performs three actions on the current subscription group:
+     * 1. Update subscription
+     * 2. Test real delay for all configs
+     * 3. Sort by test results once testing finishes
+     */
+    private fun updateSubscriptionThenTestAndSort() {
+        showLoading()
+        toast(R.string.toast_sub_update_and_test_and_sort_start)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            // Step 1: update subscription
+            val result = mainViewModel.updateConfigViaSubAll()
+            delay(500L)
+
+            withContext(Dispatchers.Main) {
+                if (result.configCount > 0) {
+                    mainViewModel.reloadServerList()
+                }
+
+                // Step 2: start real-ping test for all configs
+                toast(R.string.toast_sub_update_done_testing)
+                toast(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()))
+
+                // Register one-shot callback: when tests finish → sort → reload → hide loading
+                mainViewModel.onTestsFinishedCallback = {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        mainViewModel.sortByTestResults()
+                        withContext(Dispatchers.Main) {
+                            mainViewModel.reloadServerList()
+                            toast(R.string.toast_sort_done)
+                            hideLoading()
+                        }
+                    }
+                }
+
+                mainViewModel.testAllRealPing()
             }
         }
     }
