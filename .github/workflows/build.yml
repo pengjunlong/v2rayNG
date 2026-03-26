@@ -154,8 +154,7 @@ jobs:
         cd ${{ github.workspace }}/V2rayNG
         echo "sdk.dir=${ANDROID_HOME}" > local.properties
         chmod 755 gradlew
-        ./gradlew licenseFdroidReleaseReport
-        ./gradlew assembleRelease \
+        ./gradlew assemblePlaystoreRelease -PABI_FILTERS=arm64-v8a \
           -Pandroid.injected.signing.store.file="$KEYSTORE_FILE" \
           -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
           -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
@@ -169,7 +168,7 @@ jobs:
     - name: Collect APK artifacts
       run: |
         mkdir -p artifacts
-        find ${{ github.workspace }}/V2rayNG/app/build/outputs/apk -name "*.apk" | while read f; do
+        find ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/playstore/release -name "*arm64-v8a*.apk" | while read f; do
           cp "$f" "artifacts/$(basename "$f" .apk)-${{ steps.version.outputs.tag }}.apk"
         done
         ls -lh artifacts/
