@@ -19,6 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Worker that runs a batch of real-ping tests independently.
  * Each batch owns its own CoroutineScope/dispatcher and can be cancelled separately.
+ *
+ * Early-stop: once [FAST_NODE_TARGET] nodes with delay < [FAST_DELAY_THRESHOLD_MS] are
+ * found, remaining tests are cancelled immediately.
  */
 class RealPingWorkerService(
     private val context: Context,
@@ -31,18 +34,30 @@ class RealPingWorkerService(
     private val scope = CoroutineScope(job + dispatcher + CoroutineName("RealPingBatchWorker"))
 
     private val doneCount = AtomicInteger(0)
+    private val fastCount = AtomicInteger(0)
     private val total = guids.size
 
     fun start() {
         val jobs = guids.map { guid ->
             scope.launch {
+                // Skip if already early-stopped
+                if (job.isCancelled) return@launch
                 try {
                     val result = startRealPing(guid)
                     MessageUtil.sendMsg2UI(context, AppConfig.MSG_MEASURE_CONFIG_SUCCESS, Pair(guid, result))
+
+                    // Count fast nodes and trigger early stop if target reached
+                    if (result in 1..FAST_DELAY_THRESHOLD_MS) {
+                        val fast = fastCount.incrementAndGet()
+                        if (fast >= FAST_NODE_TARGET) {
+                            job.cancel()
+                        }
+                    }
                 } finally {
                     val done = doneCount.incrementAndGet()
-                    // notify UI: "done/total" e.g. "3/100"
-                    MessageUtil.sendMsg2UI(context, AppConfig.MSG_MEASURE_CONFIG_NOTIFY, "$done/$total")
+                    val fast = fastCount.get()
+                    // notify UI: "done/total/fast" e.g. "3/100/1"
+                    MessageUtil.sendMsg2UI(context, AppConfig.MSG_MEASURE_CONFIG_NOTIFY, "$done/$total/$fast")
                 }
             }
         }
@@ -52,7 +67,8 @@ class RealPingWorkerService(
                 joinAll(*jobs.toTypedArray())
                 onFinish("0")
             } catch (_: CancellationException) {
-                onFinish("-1")
+                // Early stop triggered — still treat as success so sort/reload runs
+                onFinish("0")
             } finally {
                 close()
             }
@@ -78,6 +94,14 @@ class RealPingWorkerService(
             return retFailure
         }
         return V2RayNativeManager.measureOutboundDelay(configResult.content, SettingsManager.getDelayTestUrl())
+    }
+
+    companion object {
+        /** Delay threshold (ms) below which a node is considered "fast". */
+        const val FAST_DELAY_THRESHOLD_MS = 300L
+
+        /** Number of fast nodes that triggers early stop. */
+        const val FAST_NODE_TARGET = 10
     }
 }
 

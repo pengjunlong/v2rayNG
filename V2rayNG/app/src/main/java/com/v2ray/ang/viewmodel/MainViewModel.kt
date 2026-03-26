@@ -484,12 +484,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
                     val content = intent.getStringExtra("content") ?: return
-                    // content is "done/total", e.g. "3/100"
+                    // content is "done/total/fast", e.g. "3/100/1"
                     val parts = content.split("/")
                     val done = parts.getOrNull(0)?.trim() ?: content
                     val total = parts.getOrNull(1)?.trim() ?: ""
+                    val fast = parts.getOrNull(2)?.trim()?.toIntOrNull() ?: 0
                     updateTestResultAction.value =
-                        getApplication<AngApplication>().getString(R.string.connection_test_progress, done, total)
+                        getApplication<AngApplication>().getString(R.string.connection_test_progress, done, total, fast)
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
