@@ -46,6 +46,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
+    /** Fires once when a batch real-ping test finishes; Activity observes this to hide loading. */
+    val testsFinishedAction by lazy { MutableLiveData<Unit>() }
     private val tcpingTestScope by lazy { CoroutineScope(Dispatchers.IO) }
 
     /** One-shot callback invoked when the batch real-ping test finishes (content == "0"). */
@@ -442,7 +444,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 // Invoke and clear the one-shot callback (e.g. from "update→test→sort" action)
                 val callback = onTestsFinishedCallback
                 onTestsFinishedCallback = null
-                callback?.invoke()
+                if (callback != null) {
+                    callback()
+                } else {
+                    // No custom callback — notify activity to hide loading
+                    testsFinishedAction.value = Unit
+                }
             }
         }
     }

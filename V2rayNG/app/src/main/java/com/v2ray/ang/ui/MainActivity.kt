@@ -110,6 +110,8 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         mainViewModel.isRunning.observe(this) { isRunning ->
             applyRunningState(false, isRunning)
         }
+        // Hide loading bar when a standalone real-ping batch finishes (no custom callback)
+        mainViewModel.testsFinishedAction.observe(this) { hideLoading() }
         mainViewModel.startListenBroadcast()
         mainViewModel.initAssets(assets)
     }
@@ -305,6 +307,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         }
 
         R.id.real_ping_all -> {
+            showLoading()
             toast(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()))
             mainViewModel.testAllRealPing()
             true
