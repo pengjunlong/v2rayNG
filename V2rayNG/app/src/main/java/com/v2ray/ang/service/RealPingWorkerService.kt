@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * Concurrency: at most [CONCURRENCY] native ping calls run in parallel.
  *
  * Early-stop: once [FAST_NODE_TARGET] nodes with delay ≤ [FAST_DELAY_THRESHOLD_MS] are
- * found, any task that hasn't started its native call yet is skipped immediately.
- * Already-running native calls cannot be interrupted (JNI blocking), so they will
- * complete normally but their results won't count toward further early-stop checks.
+ * found, any task that hasn't started its native call yet is skipped silently
+ * (no progress notification, no done-count increment).
+ * Already-running native calls will complete normally.
  */
 class RealPingWorkerService(
     private val context: Context,
@@ -48,9 +48,8 @@ class RealPingWorkerService(
     fun start() {
         val jobs = guids.map { guid ->
             scope.launch {
-                // Before acquiring semaphore, check if we should skip
+                // Skip silently if early-stop was already triggered
                 if (earlyStop.get()) {
-                    notifyProgress()
                     return@launch
                 }
 
@@ -59,12 +58,11 @@ class RealPingWorkerService(
                 try {
                     // Re-check after acquiring — may have been set while waiting
                     if (earlyStop.get()) {
-                        notifyProgress()
                         return@launch
                     }
 
-                    // Run the blocking native call on IO thread
-                    val result = withContext(Dispatchers.IO) { startRealPing(guid) }
+                    // Run the blocking native call
+                    val result = startRealPing(guid)
                     MessageUtil.sendMsg2UI(context, AppConfig.MSG_MEASURE_CONFIG_SUCCESS, Pair(guid, result))
 
                     // Count fast nodes and set early-stop flag if target reached
@@ -74,9 +72,13 @@ class RealPingWorkerService(
                             earlyStop.set(true)
                         }
                     }
+
+                    // Only notify progress for actually-executed tests
+                    val done = doneCount.incrementAndGet()
+                    val fastNow = fastCount.get()
+                    MessageUtil.sendMsg2UI(context, AppConfig.MSG_MEASURE_CONFIG_NOTIFY, "$done/$total/$fastNow")
                 } finally {
                     semaphore.release()
-                    notifyProgress()
                 }
             }
         }
@@ -85,13 +87,6 @@ class RealPingWorkerService(
             joinAll(*jobs.toTypedArray())
             onFinish("0")
         }
-    }
-
-    private fun notifyProgress() {
-        val done = doneCount.incrementAndGet()
-        val fast = fastCount.get()
-        // notify UI: "done/total/fast" e.g. "3/100/1"
-        MessageUtil.sendMsg2UI(context, AppConfig.MSG_MEASURE_CONFIG_NOTIFY, "$done/$total/$fast")
     }
 
     fun cancel() {
