@@ -94,7 +94,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         })
 
         binding.fab.setOnClickListener { handleFabAction() }
-        binding.fabLocate.setOnClickListener { locateSelectedServer() }
+        binding.fabLocate.setOnClickListener { updateSubscriptionThenTestAndSort()//locateSelectedServer() }
         binding.layoutTest.setOnClickListener { handleLayoutTestClick() }
 
         setupGroupTab()
@@ -583,6 +583,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                             mainViewModel.reloadServerList()
                             toast(R.string.toast_sort_done)
                             hideLoading()
+                            mainViewModel.selectFirstServerInList()
                         }
                     }
                 }
