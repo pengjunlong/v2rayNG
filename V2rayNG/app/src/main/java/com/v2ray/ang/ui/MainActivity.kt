@@ -94,7 +94,10 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         })
 
         binding.fab.setOnClickListener { handleFabAction() }
-        binding.fabLocate.setOnClickListener { updateSubscriptionThenTestAndSort() }
+        binding.fabLocate.setOnClickListener {
+            updateSubscriptionThenTestAndSort()
+            //locateSelectedServer()
+        }
         binding.layoutTest.setOnClickListener { handleLayoutTestClick() }
 
         setupGroupTab()
@@ -581,6 +584,11 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                         mainViewModel.sortByTestResults()
                         withContext(Dispatchers.Main) {
                             mainViewModel.reloadServerList()
+                            // Select the first server in the sorted list (fastest)
+                            val firstGuid = mainViewModel.serversCache.firstOrNull()?.guid
+                            if (firstGuid != null) {
+                                MmkvManager.setSelectServer(firstGuid)
+                            }
                             toast(R.string.toast_sort_done)
                             hideLoading()
                         }
