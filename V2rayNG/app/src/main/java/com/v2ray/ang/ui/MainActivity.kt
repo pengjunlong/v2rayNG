@@ -578,7 +578,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                 toast(R.string.toast_sub_update_done_testing)
                 toast(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()))
 
-                // Register one-shot callback: when tests finish → sort → reload → hide loading
+                // Register one-shot callback: when tests finish → sort → select first → start
                 mainViewModel.onTestsFinishedCallback = {
                     lifecycleScope.launch(Dispatchers.IO) {
                         mainViewModel.sortByTestResults()
@@ -591,6 +591,12 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                             }
                             toast(R.string.toast_sort_done)
                             hideLoading()
+                            // Start (or restart) V2Ray with the newly selected fastest node
+                            if (mainViewModel.isRunning.value == true) {
+                                restartV2Ray()
+                            } else {
+                                startV2Ray()
+                            }
                         }
                     }
                 }
