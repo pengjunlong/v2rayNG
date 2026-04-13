@@ -106,7 +106,8 @@
                         android:clickable="true"
                         android:contentDescription="@string/title_sub_update_and_test_and_sort"
                         android:focusable="true"
-                        android:src="@android:drawable/ic_menu_mylocation"
+                        android:src="@drawable/ic_rocket_24dp"
+                        app:tint="@color/colorWhite"
                         app:useCompatPadding="true"
                         app:layout_anchorGravity="bottom|right|end" />
 
