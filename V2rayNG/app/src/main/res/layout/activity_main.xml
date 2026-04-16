@@ -18,7 +18,10 @@
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize" />
+                android:layout_height="?attr/actionBarSize"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:nextFocusDown="@+id/tab_group" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -48,6 +51,10 @@
                         android:id="@+id/tab_group"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:focusableInTouchMode="false"
+                        android:nextFocusUp="@+id/toolbar"
+                        android:nextFocusDown="@+id/view_pager"
                         app:tabIndicatorFullWidth="false"
                         app:tabMode="scrollable"
                         app:tabTextAppearance="@style/TabLayoutTextStyle" />
@@ -56,6 +63,10 @@
                         android:id="@+id/view_pager"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
+                        android:focusable="true"
+                        android:focusableInTouchMode="false"
+                        android:nextFocusUp="@+id/tab_group"
+                        android:nextFocusDown="@+id/layout_test"
                         android:nextFocusRight="@+id/fab"
                         android:scrollbars="vertical"
                         android:layout_weight="1" />
@@ -67,6 +78,8 @@
                         android:clickable="true"
                         android:contentDescription="@string/connection_test_pending"
                         android:focusable="true"
+                        android:focusableInTouchMode="false"
+                        android:nextFocusUp="@+id/view_pager"
                         android:nextFocusLeft="@+id/view_pager"
                         android:nextFocusRight="@+id/fab"
                         android:orientation="vertical">
@@ -106,6 +119,9 @@
                         android:clickable="true"
                         android:contentDescription="@string/title_sub_update_and_test_and_sort"
                         android:focusable="true"
+                        android:focusableInTouchMode="false"
+                        android:nextFocusLeft="@+id/layout_test"
+                        android:nextFocusDown="@+id/fab"
                         android:src="@drawable/ic_rocket_24dp"
                         app:tint="@color/colorWhite"
                         app:useCompatPadding="true"
@@ -120,14 +136,13 @@
                         android:clickable="true"
                         android:contentDescription="@string/tasker_start_service"
                         android:focusable="true"
+                        android:focusableInTouchMode="false"
                         android:nextFocusLeft="@+id/layout_test"
+                        android:nextFocusUp="@+id/fab_locate"
                         android:src="@drawable/ic_play_24dp"
                         app:tint="@color/colorWhite"
                         app:useCompatPadding="true"
                         app:layout_anchorGravity="bottom|right|end" />
-
-
-
 
                 </FrameLayout>
             </androidx.coordinatorlayout.widget.CoordinatorLayout>

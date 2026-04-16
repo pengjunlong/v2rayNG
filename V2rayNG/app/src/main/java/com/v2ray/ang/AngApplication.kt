@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import com.tencent.mmkv.MMKV
 import com.v2ray.ang.AppConfig.ANG_PACKAGE
 import com.v2ray.ang.handler.SettingsManager
+import com.v2ray.ang.service.TvKeepAliveService
 
 class AngApplication : MultiDexApplication() {
     companion object {
@@ -44,5 +45,8 @@ class AngApplication : MultiDexApplication() {
         es.dmoral.toasty.Toasty.Config.getInstance()
             .setGravity(android.view.Gravity.BOTTOM, 0, 300)
             .apply()
+
+        // Start keep-alive service to prevent the app process from being killed on TV
+        TvKeepAliveService.start(this)
     }
 }

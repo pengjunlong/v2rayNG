@@ -22,6 +22,12 @@
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen.multitouch"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
 
     <!-- https://developer.android.com/about/versions/11/privacy/package-visibility -->
     <uses-permission
@@ -55,7 +61,8 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:resizeableActivity="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -199,6 +206,17 @@
             android:name=".service.V2RayTestService"
             android:exported="false"
             android:process=":RunSoLibV2RayDaemon" />
+
+        <!-- TV keep-alive foreground service: prevents the main process from being killed -->
+        <service
+            android:name=".service.TvKeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:stopWithTask="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="keepAlive" />
+        </service>
 
         <receiver
             android:name=".receiver.WidgetProvider"

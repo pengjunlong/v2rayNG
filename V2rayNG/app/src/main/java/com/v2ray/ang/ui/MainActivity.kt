@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
-import com.v2ray.ang.util.LogUtil
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -33,6 +32,7 @@ import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.handler.SettingsChangeManager
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.V2RayServiceManager
+import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
@@ -86,9 +86,9 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                 if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
                 } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                    isEnabled = true
+                    // On TV / back button: move to background to keep the service running
+                    // instead of finishing the activity, which prevents the VPN from being disrupted.
+                    moveTaskToBack(false)
                 }
             }
         })
@@ -674,9 +674,38 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_BUTTON_B) {
-            moveTaskToBack(false)
-            return true
+        when (keyCode) {
+            // B button on TV gamepad → minimize to background (Back is handled by onBackPressedDispatcher)
+            KeyEvent.KEYCODE_BUTTON_B -> {
+                moveTaskToBack(false)
+                return true
+            }
+            // Menu button opens the navigation drawer (common on TV remotes)
+            KeyEvent.KEYCODE_MENU -> {
+                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    binding.drawerLayout.openDrawer(GravityCompat.START)
+                }
+                return true
+            }
+            // Red colored button → toggle VPN (quick action)
+            KeyEvent.KEYCODE_PROG_RED -> {
+                handleFabAction()
+                return true
+            }
+            // Green button → trigger rocket (update + test + sort + start)
+            KeyEvent.KEYCODE_PROG_GREEN -> {
+                updateSubscriptionThenTestAndSort()
+                return true
+            }
+            // D-pad center / Enter → activate focused view
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER -> {
+                val focused = currentFocus
+                focused?.performClick()
+                return if (focused != null) true else super.onKeyDown(keyCode, event)
+            }
         }
         return super.onKeyDown(keyCode, event)
     }
