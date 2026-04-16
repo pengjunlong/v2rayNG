@@ -39,6 +39,17 @@ class SubEditActivity : BaseActivity() {
         } else {
             clearServer()
         }
+
+        // Allow clicking the entire row (not just the thumb) to toggle switches — important for TV d-pad OK press
+        binding.chkEnable.parent.let { it as? android.view.View }?.setOnClickListener {
+            binding.chkEnable.toggle()
+        }
+        binding.autoUpdateCheck.parent.let { it as? android.view.View }?.setOnClickListener {
+            binding.autoUpdateCheck.toggle()
+        }
+        binding.allowInsecureUrl.parent.let { it as? android.view.View }?.setOnClickListener {
+            binding.allowInsecureUrl.toggle()
+        }
     }
 
     /**

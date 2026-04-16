@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Focused background for small icon buttons (share / edit / delete).
+  Circular highlight, no border bar.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Focused: orange circle -->
+    <item android:state_focused="true" android:state_enabled="true">
+        <shape android:shape="oval">
+            <solid android:color="#33f97910" />
+            <stroke android:width="2dp" android:color="#CCf97910" />
+        </shape>
+    </item>
+
+    <!-- Pressed -->
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="#55f97910" />
+        </shape>
+    </item>
+
+    <!-- Default -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+
+</selector>
+

@@ -3,7 +3,6 @@ package com.v2ray.ang.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import com.v2ray.ang.util.LogUtil
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -21,6 +20,7 @@ import com.v2ray.ang.extension.toast
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
 import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
+import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.QRCodeDecoder
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.SubscriptionsViewModel
@@ -72,35 +72,37 @@ class SubSettingActivity : BaseActivity() {
         }
 
         R.id.sub_update -> {
-            showLoading()
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                val result = AngConfigManager.updateConfigViaSubAll()
-                delay(500L)
-                launch(Dispatchers.Main) {
-                    if (result.successCount + result.failureCount + result.skipCount == 0) {
-                        toast(R.string.title_update_subscription_no_subscription)
-                    } else if (result.successCount > 0 && result.failureCount + result.skipCount == 0) {
-                        toast(getString(R.string.title_update_config_count, result.configCount))
-                    } else {
-                        toast(
-                            getString(
-                                R.string.title_update_subscription_result,
-                                result.configCount, result.successCount, result.failureCount, result.skipCount
-                            )
-                        )
-                    }
-                    hideLoading()
-                    refreshData()
-                }
-            }
-
+            triggerSubUpdate()
             true
         }
 
         else -> super.onOptionsItemSelected(item)
-
     }
+
+    private fun triggerSubUpdate() {
+        showLoading()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = AngConfigManager.updateConfigViaSubAll()
+            delay(500L)
+            launch(Dispatchers.Main) {
+                if (result.successCount + result.failureCount + result.skipCount == 0) {
+                    toast(R.string.title_update_subscription_no_subscription)
+                } else if (result.successCount > 0 && result.failureCount + result.skipCount == 0) {
+                    toast(getString(R.string.title_update_config_count, result.configCount))
+                } else {
+                    toast(
+                        getString(
+                            R.string.title_update_subscription_result,
+                            result.configCount, result.successCount, result.failureCount, result.skipCount
+                        )
+                    )
+                }
+                hideLoading()
+                refreshData()
+            }
+        }
+    }
+
 
     @SuppressLint("NotifyDataSetChanged")
     fun refreshData() {

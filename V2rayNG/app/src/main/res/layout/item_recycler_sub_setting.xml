@@ -11,9 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/bg_tv_focus"
         android:clickable="true"
         android:focusable="true"
+        android:focusableInTouchMode="false"
         android:gravity="center"
         android:nextFocusRight="@+id/layout_share"
         android:orientation="horizontal"
@@ -56,12 +57,14 @@
                         android:id="@+id/layout_share"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_tv_focus_borderless"
                         android:clickable="true"
                         android:contentDescription="@string/title_configuration_share"
                         android:focusable="true"
+                        android:focusableInTouchMode="false"
                         android:gravity="center"
                         android:nextFocusLeft="@+id/info_container"
+                        android:nextFocusRight="@+id/layout_edit"
                         android:orientation="vertical"
                         android:padding="@dimen/padding_spacing_dp8">
 
@@ -77,11 +80,14 @@
                         android:id="@+id/layout_edit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_tv_focus_borderless"
                         android:clickable="true"
                         android:contentDescription="@string/menu_item_edit_config"
                         android:focusable="true"
+                        android:focusableInTouchMode="false"
                         android:gravity="center"
+                        android:nextFocusLeft="@+id/layout_share"
+                        android:nextFocusRight="@+id/layout_remove"
                         android:orientation="vertical"
                         android:padding="@dimen/padding_spacing_dp8">
 
@@ -97,11 +103,13 @@
                         android:id="@+id/layout_remove"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_tv_focus_borderless"
                         android:clickable="true"
                         android:contentDescription="@string/menu_item_del_config"
                         android:focusable="true"
+                        android:focusableInTouchMode="false"
                         android:gravity="center"
+                        android:nextFocusLeft="@+id/layout_edit"
                         android:orientation="vertical"
                         android:padding="@dimen/padding_spacing_dp8">
 
@@ -112,7 +120,6 @@
                             app:srcCompat="@drawable/ic_delete_24dp" />
 
                     </LinearLayout>
-
 
                 </LinearLayout>
 
@@ -152,6 +159,8 @@
                         android:id="@+id/chk_enable"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:focusable="true"
+                        android:focusableInTouchMode="false"
                         app:theme="@style/BrandedSwitch" />
                 </LinearLayout>
 

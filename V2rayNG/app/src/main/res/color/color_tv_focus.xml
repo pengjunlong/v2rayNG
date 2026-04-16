@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TV D-pad focus highlight color (orange accent, adapts to day/night via alpha) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="#33f97910" android:state_focused="true" />
+    <item android:color="#00000000" />
+</selector>
+

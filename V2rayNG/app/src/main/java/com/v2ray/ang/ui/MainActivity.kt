@@ -689,16 +689,6 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                 }
                 return true
             }
-            // Red colored button → toggle VPN (quick action)
-            KeyEvent.KEYCODE_PROG_RED -> {
-                handleFabAction()
-                return true
-            }
-            // Green button → trigger rocket (update + test + sort + start)
-            KeyEvent.KEYCODE_PROG_GREEN -> {
-                updateSubscriptionThenTestAndSort()
-                return true
-            }
             // D-pad center / Enter → activate focused view
             KeyEvent.KEYCODE_DPAD_CENTER,
             KeyEvent.KEYCODE_ENTER -> {
