@@ -5,7 +5,7 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
-import android.util.Log
+import com.v2ray.ang.util.LogUtil
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -392,7 +392,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
             val clipboard = Utils.getClipboard(this)
             importBatchConfig(clipboard)
         } catch (e: Exception) {
-            Log.e(AppConfig.TAG, "Failed to import config from clipboard", e)
+            LogUtil.e(AppConfig.TAG, "Failed to import config from clipboard", e)
             return false
         }
         return true
@@ -422,7 +422,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                     toastError(R.string.toast_failure)
                     hideLoading()
                 }
-                Log.e(AppConfig.TAG, "Failed to import batch config", e)
+                LogUtil.e(AppConfig.TAG, "Failed to import batch config", e)
             }
         }
     }
@@ -434,7 +434,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
         try {
             showFileChooser()
         } catch (e: Exception) {
-            Log.e(AppConfig.TAG, "Failed to import config from local file", e)
+            LogUtil.e(AppConfig.TAG, "Failed to import config from local file", e)
             return false
         }
         return true
@@ -628,7 +628,7 @@ class MainActivity : HelperBaseActivity(), NavigationView.OnNavigationItemSelect
                 importBatchConfig(input?.bufferedReader()?.readText())
             }
         } catch (e: Exception) {
-            Log.e(AppConfig.TAG, "Failed to read content from URI", e)
+            LogUtil.e(AppConfig.TAG, "Failed to read content from URI", e)
         }
     }
 
