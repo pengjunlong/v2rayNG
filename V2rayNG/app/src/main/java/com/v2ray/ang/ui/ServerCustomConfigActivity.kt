@@ -1,8 +1,8 @@
 package com.v2ray.ang.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import com.v2ray.ang.util.LogUtil
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
@@ -18,6 +18,7 @@ import com.v2ray.ang.extension.toastSuccess
 import com.v2ray.ang.fmt.CustomFmt
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.util.LogUtil
 import com.v2ray.ang.util.Utils
 
 class ServerCustomConfigActivity : BaseActivity() {
@@ -35,10 +36,13 @@ class ServerCustomConfigActivity : BaseActivity() {
         //setContentView(binding.root)
         setContentViewWithToolbar(binding.root, showHomeAsUp = true, title = EConfigType.CUSTOM.toString())
 
-        if (!Utils.getDarkModeStatus(this)) {
-            binding.editor.colorScheme = EditorTheme.INTELLIJ_LIGHT
+        // EditorKit requires API 24+; apply syntax highlighting only on supported devices
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (!Utils.getDarkModeStatus(this)) {
+                binding.editor.colorScheme = EditorTheme.INTELLIJ_LIGHT
+            }
+            binding.editor.language = JsonLanguage()
         }
-        binding.editor.language = JsonLanguage()
         val config = MmkvManager.decodeServerConfig(editGuid)
         if (config != null) {
             bindingServer(config)

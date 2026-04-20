@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="MissingLeanbackLauncher">
 
+    <!-- Explicit uses-sdk to override editorkit's minSdk=24 declaration.
+         The editor is guarded at runtime (Build.VERSION_CODES.N check), so API 23 is safe. -->
+    <uses-sdk tools:overrideLibrary="com.blacksquircle.ui.editorkit,com.blacksquircle.ui.language.base,com.blacksquircle.ui.language.json" />
+
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
