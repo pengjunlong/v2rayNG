@@ -25,12 +25,16 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SpeedtestManager
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
+import com.v2ray.ang.viewmodel.MainViewModel.Companion.FAST_DELAY_THRESHOLD_MS
+import com.v2ray.ang.viewmodel.MainViewModel.Companion.FAST_NODE_TARGET
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = MmkvManager.decodeServerList()
@@ -42,7 +46,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isRunning by lazy { MutableLiveData<Boolean>() }
     val updateListAction by lazy { MutableLiveData<Int>() }
     val updateTestResultAction by lazy { MutableLiveData<String>() }
+    /** Fires once when a batch real-ping test finishes; Activity observes this to hide loading. */
+    val testsFinishedAction by lazy { MutableLiveData<Unit>() }
     private val tcpingTestScope by lazy { CoroutineScope(Dispatchers.IO) }
+
+    /** One-shot callback invoked when the batch real-ping test finishes. */
+    var onTestsFinishedCallback: (() -> Unit)? = null
+
+    // --- real-ping batch progress tracking ---
+    private val realPingEarlyStop = AtomicBoolean(false)
+    private val realPingDoneCount = AtomicInteger(0)
+    private val realPingFastCount = AtomicInteger(0)
+    private var realPingTotal = 0
+    /** Guards against invoking onBatchRealPingFinished() more than once per batch. */
+    private val realPingFinishedOnce = AtomicBoolean(false)
 
     /**
      * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):
@@ -228,15 +245,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * Tests the real ping for all servers.
+     * Supports early-stop: once [FAST_NODE_TARGET] nodes with delay ≤ [FAST_DELAY_THRESHOLD_MS]
+     * are found, pending tasks are skipped silently.
      */
     fun testAllRealPing() {
         MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG_CANCEL, "")
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
 
+        // Reset batch state
+        realPingEarlyStop.set(false)
+        realPingDoneCount.set(0)
+        realPingFastCount.set(0)
+        realPingFinishedOnce.set(false)
+        realPingTotal = serversCache.size
+
         val serversCopy = serversCache.toList()
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             for (item in serversCopy) {
+                if (realPingEarlyStop.get()) break
                 MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG, item.guid)
             }
         }
@@ -463,8 +490,52 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     val resultPair = intent.serializable<Pair<String, Long>>("content") ?: return
                     MmkvManager.encodeServerTestDelayMillis(resultPair.first, resultPair.second)
                     updateListAction.value = getPosition(resultPair.first)
+
+                    // Track fast nodes for early-stop
+                    val delay = resultPair.second
+                    if (delay in 1..FAST_DELAY_THRESHOLD_MS) {
+                        val fast = realPingFastCount.incrementAndGet()
+                        if (fast >= FAST_NODE_TARGET) {
+                            realPingEarlyStop.set(true)
+                        }
+                    }
+
+                    val done = realPingDoneCount.incrementAndGet()
+                    val fastNow = realPingFastCount.get()
+                    val total = realPingTotal
+                    // Update test progress display
+                    updateTestResultAction.value =
+                        getApplication<AngApplication>().getString(
+                            R.string.connection_test_progress, done, total, fastNow
+                        )
+
+                    // Check if all (non-skipped) tests are done; guard against double-fire
+                    val shouldFinish = (done >= total) ||
+                        (realPingEarlyStop.get() && done >= minOf(total, FAST_NODE_TARGET))
+                    if (shouldFinish && realPingFinishedOnce.compareAndSet(false, true)) {
+                        onBatchRealPingFinished()
+                    }
                 }
             }
         }
+    }
+
+    private fun onBatchRealPingFinished() {
+        reloadServerList()
+        val callback = onTestsFinishedCallback
+        onTestsFinishedCallback = null
+        if (callback != null) {
+            callback()
+        } else {
+            testsFinishedAction.value = Unit
+        }
+    }
+
+    companion object {
+        /** Delay threshold (ms) below which a node is considered "fast". */
+        const val FAST_DELAY_THRESHOLD_MS = 300L
+
+        /** Number of fast nodes that triggers early stop. */
+        const val FAST_NODE_TARGET = 20
     }
 }

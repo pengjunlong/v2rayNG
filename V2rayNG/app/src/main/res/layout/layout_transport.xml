@@ -17,11 +17,15 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
     </LinearLayout>
 
+    <!-- Network type -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -37,11 +41,15 @@
             android:entries="@array/networks" />
     </LinearLayout>
 
+    <!-- Header type -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:id="@+id/sp_header_type_title"
@@ -57,11 +65,15 @@
             android:layout_marginBottom="@dimen/padding_spacing_dp8" />
     </LinearLayout>
 
+    <!-- Request host -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:id="@+id/tv_request_host"
@@ -76,12 +88,15 @@
             android:inputType="text" />
     </LinearLayout>
 
-
+    <!-- Path -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:id="@+id/tv_path"
@@ -96,12 +111,16 @@
             android:inputType="text" />
     </LinearLayout>
 
+    <!-- Extra (xhttp) -->
     <LinearLayout
         android:id="@+id/layout_extra"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"

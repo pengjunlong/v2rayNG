@@ -29,7 +29,7 @@
                 android:id="@+id/layout_geo_files_sources"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
+                android:background="@drawable/bg_tv_focus"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center|start"

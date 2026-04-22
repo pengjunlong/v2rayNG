@@ -9,6 +9,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -120,40 +122,81 @@ jobs:
         fileName: "android_keystore.jks"
         encodedString: ${{ secrets.APP_KEYSTORE_BASE64 }}
 
-    - name: Build APK
+    - name: Build APK (arm64-v8a, sideload)
       run: |
         cd ${{ github.workspace }}/V2rayNG
         echo "sdk.dir=${ANDROID_HOME}" > local.properties
+        echo "ABI_FILTERS=arm64-v8a" >> local.properties
         chmod 755 gradlew
-        ./gradlew licenseFdroidReleaseReport
-        ./gradlew assembleRelease -Pandroid.injected.signing.store.file=${{ steps.android_keystore.outputs.filePath }} -Pandroid.injected.signing.store.password=${{ secrets.APP_KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.APP_KEYSTORE_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.APP_KEY_PASSWORD }}
+        # assemblePlaystoreRelease: applicationId=com.v2ray.ang, suitable for direct sideload install
+        ./gradlew assemblePlaystoreRelease \
+          -Pandroid.injected.signing.store.file=${{ steps.android_keystore.outputs.filePath }} \
+          -Pandroid.injected.signing.store.password=${{ secrets.APP_KEYSTORE_PASSWORD }} \
+          -Pandroid.injected.signing.key.alias=${{ secrets.APP_KEYSTORE_ALIAS }} \
+          -Pandroid.injected.signing.key.password=${{ secrets.APP_KEY_PASSWORD }}
     
-    - name: Upload arm64-v8a APK
+    - name: Upload arm64-v8a APK artifact
       uses: actions/upload-artifact@v4.6.2
-      if: ${{  success() }}
+      if: ${{ success() }}
       with:
         name: arm64-v8a
-        path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/*/release/*arm64-v8a*.apk
+        path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/playstore/release/*arm64-v8a*.apk
 
-    - name: Upload armeabi-v7a APK
-      uses: actions/upload-artifact@v4.6.2
-      if: ${{  success() }}
-      with:
-        name: armeabi-v7a
-        path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/*/release/*armeabi-v7a*.apk
+  release:
+    runs-on: ubuntu-latest
+    # Only run on v*.*.* tag pushes
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
 
-    - name: Upload x86 APK
-      uses: actions/upload-artifact@v4.6.2
-      if: ${{  success() }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
       with:
-        name: x86-apk
-        path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/*/release/*x86*.apk
+        fetch-depth: '0'
 
-    - name: Upload to release
-      uses: svenstaro/upload-release-action@v2
-      if: github.event.inputs.release_tag != ''
+    - name: Parse version from tag
+      id: version
+      run: |
+        TAG="${GITHUB_REF#refs/tags/}"
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        VERSION="${TAG#v}"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Generate Changelog
+      id: changelog
+      run: |
+        # Get the previous tag to generate changelog between tags
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+        if [ -n "$PREV_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" "$PREV_TAG"..HEAD)
+        else
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+        fi
+        # Escape multiline for GitHub Actions output
+        EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+        echo "changelog<<$EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "$EOF" >> $GITHUB_OUTPUT
+
+    - name: Download arm64-v8a APK artifact
+      uses: actions/download-artifact@v4
       with:
-        file: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/*/release/*.apk
-        tag: ${{ github.event.inputs.release_tag }}
-        file_glob: true
-        prerelease: true
+        name: arm64-v8a
+        path: ./release-apks/
+
+    - name: Publish GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: "v2rayNG ${{ steps.version.outputs.version }}"
+        body: |
+          ## What's Changed
+          ${{ steps.changelog.outputs.changelog }}
+
+          ---
+          **Build:** arm64-v8a (non-fdroid)
+        files: ./release-apks/*.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

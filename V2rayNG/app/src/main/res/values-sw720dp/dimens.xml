@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TV / large-screen overrides (sw >= 720dp, e.g. 1080p/720p Android TV) -->
+<resources>
+    <!-- Bigger bottom bar so FAB and test-state are easier to hit with D-pad -->
+    <dimen name="view_height_dp64">80dp</dimen>
+
+    <!-- Larger icon areas for remote-control tap zones -->
+    <dimen name="image_size_dp24">32dp</dimen>
+
+    <!-- Wider spacing so focus highlight is visually distinct at TV viewing distance -->
+    <dimen name="padding_spacing_dp8">12dp</dimen>
+    <dimen name="padding_spacing_dp16">20dp</dimen>
+</resources>
+

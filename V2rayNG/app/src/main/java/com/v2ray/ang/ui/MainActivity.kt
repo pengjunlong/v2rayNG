@@ -37,8 +37,8 @@ import com.v2ray.ang.extension.toastError
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.MigrateManager
 import com.v2ray.ang.handler.MmkvManager
-import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.handler.V2RayServiceManager
+import com.v2ray.ang.helper.SimpleItemTouchHelperCallback
 import com.v2ray.ang.util.Utils
 import com.v2ray.ang.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
@@ -206,6 +206,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             }
         }
         mainViewModel.updateTestResultAction.observe(this) { setTestState(it) }
+        mainViewModel.testsFinishedAction.observe(this) {
+            binding.pbWaiting.hide()
+        }
         mainViewModel.isRunning.observe(this) { isRunning ->
             adapter.isRunning = isRunning
             if (isRunning) {
@@ -383,15 +386,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         R.id.real_ping_all -> {
             toast(getString(R.string.connection_test_testing_count, mainViewModel.serversCache.count()))
+            binding.pbWaiting.show()
             mainViewModel.testAllRealPing()
-            true
-        }
-
-        R.id.intelligent_selection_all -> {
-            if (MmkvManager.decodeSettingsString(AppConfig.PREF_OUTBOUND_DOMAIN_RESOLVE_METHOD, "1") != "0") {
-                toast(getString(R.string.pre_resolving_domain))
-            }
-            mainViewModel.createIntelligentSelectionAll()
             true
         }
 
@@ -425,6 +421,15 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             true
         }
 
+        R.id.sub_update_and_test_and_sort -> {
+            updateSubscriptionThenTestAndSort()
+            true
+        }
+
+        R.id.exit_app -> {
+            exitApp()
+            true
+        }
 
         else -> super.onOptionsItemSelected(item)
     }
@@ -615,6 +620,60 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     /**
+     * 停止 V2Ray 服务并彻底退出应用进程，适用于 TV 遥控器场景（避免切后台后被误杀）。
+     */
+    private fun exitApp() {
+        if (mainViewModel.isRunning.value == true) {
+            V2RayServiceManager.stopVService(this)
+        }
+        finishAffinity()
+    }
+
+    /**
+     * 1. 更新订阅
+     * 2. 真连接测试所有节点（带Early-Stop）
+     * 3. 测试完成后按结果排序 → 选中延迟最低节点 → 自动启动/重启 V2Ray
+     */
+    private fun updateSubscriptionThenTestAndSort() {
+        toast(getString(R.string.toast_sub_update_and_test_and_sort_start))
+        binding.pbWaiting.show()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            // Step 1: update subscriptions
+            val count = mainViewModel.updateConfigViaSubAll()
+            delay(500L)
+            withContext(Dispatchers.Main) {
+                if (count > 0) {
+                    mainViewModel.reloadServerList()
+                }
+                toast(getString(R.string.toast_sub_update_done_testing))
+
+                // Step 2: real-ping test all (Early-Stop enabled in ViewModel)
+                // Register one-shot callback to be invoked when batch finishes
+                mainViewModel.onTestsFinishedCallback = {
+                    // Step 3: sort → select best → start/restart V2Ray
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        mainViewModel.sortByTestResults()
+                        withContext(Dispatchers.Main) {
+                            mainViewModel.reloadServerList()
+                            // Select the first (best) server in current list
+                            val best = mainViewModel.serversCache.firstOrNull()
+                            if (best != null) {
+                                MmkvManager.setSelectServer(best.guid)
+                                mainViewModel.reloadServerList()
+                                toast(getString(R.string.toast_sort_done))
+                                restartV2Ray()
+                            }
+                            binding.pbWaiting.hide()
+                        }
+                    }
+                }
+                mainViewModel.testAllRealPing()
+            }
+        }
+    }
+
+    /**
      * show file chooser
      */
     private fun showFileChooser() {
@@ -674,7 +733,20 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_BUTTON_B) {
-            moveTaskToBack(false)
+            if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                moveTaskToBack(false)
+            }
+            return true
+        }
+        // TV remote MENU key / red button → open navigation drawer
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            } else {
+                binding.drawerLayout.openDrawer(GravityCompat.START)
+            }
             return true
         }
         return super.onKeyDown(keyCode, event)

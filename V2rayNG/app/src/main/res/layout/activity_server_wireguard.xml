@@ -14,11 +14,15 @@
 
         <include layout="@layout/layout_address_port" />
 
+        <!-- Secret key -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -33,17 +37,20 @@
 
         </LinearLayout>
 
+        <!-- Public key -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/server_lab_public_key" />
-
 
             <EditText
                 android:id="@+id/et_public_key"
@@ -53,17 +60,20 @@
 
         </LinearLayout>
 
+        <!-- Pre-shared key -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/server_lab_preshared_key" />
-
 
             <EditText
                 android:id="@+id/et_preshared_key"
@@ -73,11 +83,15 @@
 
         </LinearLayout>
 
+        <!-- Reserved -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -98,11 +112,15 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Local address -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="match_parent"
@@ -116,11 +134,15 @@
                 android:inputType="text" />
         </LinearLayout>
 
+        <!-- Local MTU -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="match_parent"

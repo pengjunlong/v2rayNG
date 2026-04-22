@@ -12,6 +12,7 @@ import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.os.PowerManager
 import android.os.StrictMode
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -30,6 +31,7 @@ class V2RayVpnService : VpnService(), ServiceControl {
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private var tun2SocksService: Tun2SocksControl? = null
+    private var wakeLock: PowerManager.WakeLock? = null
 
     /**destroy
      * Unfortunately registerDefaultNetworkCallback is going to return our VPN interface: https://android.googlesource.com/platform/frameworks/base/+/dda156ab0c5d66ad82bdcf76cda07cbc0a9c8a2e
@@ -73,6 +75,11 @@ class V2RayVpnService : VpnService(), ServiceControl {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         V2RayServiceManager.serviceControl = SoftReference(this)
+        // Acquire WakeLock to prevent CPU from sleeping while VPN is active (TV / Android 6)
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "v2rayNG:VpnWakeLock")
+        wakeLock?.setReferenceCounted(false)
+        wakeLock?.acquire()
     }
 
     override fun onRevoke() {
@@ -87,6 +94,8 @@ class V2RayVpnService : VpnService(), ServiceControl {
     override fun onDestroy() {
         super.onDestroy()
         NotificationManager.cancelNotification()
+        wakeLock?.release()
+        wakeLock = null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

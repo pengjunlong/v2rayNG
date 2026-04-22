@@ -18,11 +18,15 @@
             android:orientation="vertical"
             android:padding="@dimen/padding_spacing_dp16">
 
+            <!-- Remarks -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -36,11 +40,15 @@
                     android:inputType="text" />
             </LinearLayout>
 
+            <!-- Locked switch -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/chk_locked"
@@ -64,11 +72,15 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
             </LinearLayout>
 
+            <!-- Domain -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -84,11 +96,15 @@
                     android:maxLines="10" />
             </LinearLayout>
 
+            <!-- IP -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -104,11 +120,15 @@
                     android:maxLines="10" />
             </LinearLayout>
 
+            <!-- Port -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -122,11 +142,15 @@
                     android:inputType="text" />
             </LinearLayout>
 
+            <!-- Protocol -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -141,11 +165,15 @@
                     android:inputType="text" />
             </LinearLayout>
 
+            <!-- Network -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -160,11 +188,15 @@
                     android:inputType="text" />
             </LinearLayout>
 
+            <!-- Outbound tag -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"

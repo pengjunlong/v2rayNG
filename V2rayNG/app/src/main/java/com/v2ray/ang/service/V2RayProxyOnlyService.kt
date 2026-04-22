@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.annotation.RequiresApi
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.V2RayServiceManager
@@ -12,12 +13,19 @@ import com.v2ray.ang.util.MyContextWrapper
 import java.lang.ref.SoftReference
 
 class V2RayProxyOnlyService : Service(), ServiceControl {
+    private var wakeLock: PowerManager.WakeLock? = null
+
     /**
      * Initializes the service.
      */
     override fun onCreate() {
         super.onCreate()
         V2RayServiceManager.serviceControl = SoftReference(this)
+        // Acquire WakeLock to prevent CPU from sleeping while proxy is active (TV / Android 6)
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "v2rayNG:ProxyWakeLock")
+        wakeLock?.setReferenceCounted(false)
+        wakeLock?.acquire()
     }
 
     /**
@@ -38,6 +46,8 @@ class V2RayProxyOnlyService : Service(), ServiceControl {
     override fun onDestroy() {
         super.onDestroy()
         V2RayServiceManager.stopCoreLoop()
+        wakeLock?.release()
+        wakeLock = null
     }
 
     /**

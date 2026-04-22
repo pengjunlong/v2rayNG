@@ -22,96 +22,94 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <RelativeLayout
+        <!-- Progress indicator -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/pb_waiting"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="invisible"
+            app:indicatorColor="@color/color_fab_active" />
 
-            <androidx.coordinatorlayout.widget.CoordinatorLayout
-                android:id="@+id/main_content"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+        <!-- Subscription group tabs -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:padding="@dimen/padding_spacing_dp8"
+            app:tabBackground="@drawable/bg_tab_item_focus"
+            app:tabIndicatorFullWidth="false"
+            app:tabMode="scrollable"
+            app:tabRippleColor="@color/color_fab_active"
+            app:tabTextAppearance="@style/TabLayoutTextStyle" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+        <!-- Server list: weight=1, fills remaining space -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:nextFocusDown="@+id/layout_test"
+            android:nextFocusRight="@+id/fab"
+            android:nextFocusUp="@+id/tab_group"
+            android:scrollbars="vertical" />
 
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/pb_waiting"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:indeterminate="true"
-                        android:visibility="invisible"
-                        app:indicatorColor="@color/color_fab_active" />
+        <!-- Divider above the bottom bar -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider_color_light" />
 
-                    <com.google.android.material.tabs.TabLayout
-                        android:id="@+id/tab_group"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="@dimen/padding_spacing_dp8"
-                        app:tabIndicatorFullWidth="false"
-                        app:tabMode="scrollable"
-                        app:tabTextAppearance="@style/TabLayoutTextStyle" />
+        <!-- Bottom bar: test state (left) + FAB (right), always visible -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/view_height_dp64"
+            android:orientation="horizontal">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:nextFocusRight="@+id/fab"
-                        android:scrollbars="vertical" />
+            <!-- Test-state area, takes all width except FAB -->
+            <LinearLayout
+                android:id="@+id/layout_test"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tv_focus"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusLeft="@+id/recycler_view"
+                android:nextFocusRight="@+id/fab"
+                android:nextFocusUp="@+id/recycler_view"
+                android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/layout_test"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/view_height_dp64"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:nextFocusLeft="@+id/recycler_view"
-                        android:nextFocusRight="@+id/fab"
-                        android:orientation="vertical">
-
-                        <View
-                            android:layout_width="wrap_content"
-                            android:layout_height="1dp"
-                            android:background="@color/divider_color_light" />
-
-                        <TextView
-                            android:id="@+id/tv_test_state"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:gravity="start|center"
-                            android:maxLines="2"
-                            android:minLines="1"
-                            android:paddingStart="@dimen/padding_spacing_dp16"
-                            android:text="@string/connection_test_pending"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <FrameLayout
+                <TextView
+                    android:id="@+id/tv_test_state"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginEnd="@dimen/padding_spacing_dp16">
+                    android:layout_height="match_parent"
+                    android:gravity="start|center"
+                    android:maxLines="2"
+                    android:minLines="1"
+                    android:paddingStart="@dimen/padding_spacing_dp16"
+                    android:text="@string/connection_test_pending"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
-                    <com.google.android.material.floatingactionbutton.FloatingActionButton
-                        android:id="@+id/fab"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|end"
-                        android:layout_marginBottom="@dimen/view_height_dp36"
-                        android:clickable="true"
-                        android:contentDescription="@string/tasker_start_service"
-                        android:focusable="true"
-                        android:nextFocusLeft="@+id/layout_test"
-                        android:src="@drawable/ic_play_24dp"
-                        app:layout_anchorGravity="bottom|right|end" />
+            </LinearLayout>
 
-                </FrameLayout>
-            </androidx.coordinatorlayout.widget.CoordinatorLayout>
-        </RelativeLayout>
+            <!-- FAB embedded in the bottom bar — always reachable via D-pad RIGHT from any row -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="@dimen/padding_spacing_dp8"
+                android:clickable="true"
+                android:contentDescription="@string/tasker_start_service"
+                android:focusable="true"
+                android:nextFocusLeft="@+id/layout_test"
+                android:nextFocusUp="@+id/recycler_view"
+                android:src="@drawable/ic_play_24dp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -120,7 +118,9 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
-        app:itemIconTint="@color/colorAccent"
+        app:itemBackground="@drawable/bg_nav_item_focus"
+        app:itemIconTint="@color/color_fab_active"
+        app:itemTextColor="@color/colorAccent"
         app:menu="@menu/menu_drawer">
 
     </com.google.android.material.navigation.NavigationView>

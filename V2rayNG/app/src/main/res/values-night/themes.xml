@@ -8,6 +8,15 @@
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="colorControlNormal">@color/colorAccent</item>
+        <!-- TV: AlertDialog button focus highlight (same as light) -->
+        <item name="buttonBarButtonStyle">@style/TvDialogButtonStyle</item>
+    </style>
+
+    <style name="AppThemeDayNight.NoActionBar" parent="AppThemeDayNight">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <!-- TV: Toolbar icon / overflow-menu button focus highlight -->
+        <item name="actionBarItemBackground">@drawable/bg_toolbar_item_focus</item>
     </style>
 
 </resources>

@@ -14,17 +14,20 @@
 
         <include layout="@layout/layout_address_port" />
 
+        <!-- Security (auth type) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/server_lab_security4" />
-
 
             <EditText
                 android:id="@+id/et_security"
@@ -34,11 +37,15 @@
 
         </LinearLayout>
 
+        <!-- Username/Password -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
+            android:background="@drawable/bg_tv_focus"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_spacing_dp4">
 
             <TextView
                 android:layout_width="wrap_content"

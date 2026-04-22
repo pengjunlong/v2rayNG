@@ -8,8 +8,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/bg_tv_focus"
+        android:clickable="true"
+        android:focusable="true"
         android:gravity="center"
+        android:nextFocusRight="@+id/layout_edit"
         android:orientation="horizontal"
         android:padding="@dimen/padding_spacing_dp8">
 
@@ -47,7 +50,6 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     tools:text="1MB . 2020.01.01" />
 
-
             </LinearLayout>
 
         </LinearLayout>
@@ -56,9 +58,10 @@
             android:id="@+id/layout_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_tv_focus"
             android:clickable="true"
             android:focusable="true"
+            android:nextFocusLeft="@+id/layout_edit"
             android:padding="@dimen/padding_spacing_dp8">
 
             <ImageView
@@ -71,9 +74,10 @@
             android:id="@+id/layout_remove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_tv_focus"
             android:clickable="true"
             android:focusable="true"
+            android:nextFocusLeft="@+id/layout_edit"
             android:padding="@dimen/padding_spacing_dp8">
 
             <ImageView

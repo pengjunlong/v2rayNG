@@ -5,13 +5,16 @@
     android:layout_marginTop="@dimen/padding_spacing_dp16"
     android:orientation="vertical">
 
+    <!-- Stream security -->
     <LinearLayout
         android:id="@+id/lay_stream_security"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,12 +32,16 @@
 
     </LinearLayout>
 
+    <!-- SNI -->
     <LinearLayout
         android:id="@+id/lay_sni"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -50,12 +57,16 @@
 
     </LinearLayout>
 
+    <!-- Fingerprint -->
     <LinearLayout
         android:id="@+id/lay_stream_fingerprint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -73,12 +84,16 @@
 
     </LinearLayout>
 
+    <!-- ALPN -->
     <LinearLayout
         android:id="@+id/lay_stream_alpn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -96,11 +111,15 @@
 
     </LinearLayout>
 
+    <!-- Allow insecure -->
     <LinearLayout
         android:id="@+id/lay_allow_insecure"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -116,12 +135,16 @@
             android:entries="@array/allowinsecures" />
     </LinearLayout>
 
+    <!-- Public key (Reality) -->
     <LinearLayout
         android:id="@+id/lay_public_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -137,12 +160,16 @@
 
     </LinearLayout>
 
+    <!-- Short ID (Reality) -->
     <LinearLayout
         android:id="@+id/lay_short_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -158,12 +185,16 @@
 
     </LinearLayout>
 
+    <!-- Spider X (Reality) -->
     <LinearLayout
         android:id="@+id/lay_spider_x"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -179,12 +210,16 @@
 
     </LinearLayout>
 
+    <!-- MLDSA65 verify -->
     <LinearLayout
         android:id="@+id/lay_mldsa65_verify"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"

@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:focusable="false"
+    android:descendantFocusability="afterDescendants"
     tools:context=".ui.SubEditActivity">
 
     <LinearLayout
@@ -30,11 +32,15 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
             </LinearLayout>
 
+            <!-- Remarks -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -45,21 +51,26 @@
                     android:id="@+id/et_remarks"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:nextFocusDown="@+id/et_url"
+                    android:nextFocusUp="@+id/et_next_profile" />
 
             </LinearLayout>
 
+            <!-- URL -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/sub_setting_url" />
-
 
                 <EditText
                     android:id="@+id/et_url"
@@ -69,16 +80,22 @@
                     android:inputType="textMultiLine"
                     android:maxLines="10"
                     android:minLines="2"
+                    android:nextFocusDown="@+id/et_user_agent"
+                    android:nextFocusUp="@+id/et_remarks"
                     android:scrollbars="vertical"
                     tools:ignore="TextFields" />
 
             </LinearLayout>
 
+            <!-- User-Agent -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -89,15 +106,21 @@
                     android:id="@+id/et_user_agent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:nextFocusDown="@+id/et_filter"
+                    android:nextFocusUp="@+id/et_url" />
 
             </LinearLayout>
 
+            <!-- Filter -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -108,15 +131,21 @@
                     android:id="@+id/et_filter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:nextFocusDown="@+id/et_intelligent_selection_filter"
+                    android:nextFocusUp="@+id/et_user_agent" />
 
             </LinearLayout>
 
+            <!-- Intelligent-Selection Filter -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -127,15 +156,21 @@
                     android:id="@+id/et_intelligent_selection_filter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:nextFocusDown="@+id/chk_enable"
+                    android:nextFocusUp="@+id/et_filter" />
 
             </LinearLayout>
 
+            <!-- Enable switch row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="horizontal">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="horizontal"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="0dp"
@@ -147,17 +182,24 @@
                     android:id="@+id/chk_enable"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:nextFocusDown="@+id/auto_update_check"
+                    android:nextFocusUp="@+id/et_intelligent_selection_filter"
                     android:paddingStart="@dimen/padding_spacing_dp16"
                     android:paddingEnd="@dimen/padding_spacing_dp16"
                     app:theme="@style/BrandedSwitch" />
 
             </LinearLayout>
 
+            <!-- Auto-update switch row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="horizontal">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="horizontal"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="0dp"
@@ -165,22 +207,28 @@
                     android:layout_weight="1.0"
                     android:text="@string/sub_auto_update" />
 
-
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/auto_update_check"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:nextFocusDown="@+id/allow_insecure_url"
+                    android:nextFocusUp="@+id/chk_enable"
                     android:paddingStart="@dimen/padding_spacing_dp16"
                     android:paddingEnd="@dimen/padding_spacing_dp16"
                     app:theme="@style/BrandedSwitch" />
 
             </LinearLayout>
 
+            <!-- Allow insecure URL switch row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="horizontal">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="horizontal"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="0dp"
@@ -192,17 +240,24 @@
                     android:id="@+id/allow_insecure_url"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:nextFocusDown="@+id/et_pre_profile"
+                    android:nextFocusUp="@+id/auto_update_check"
                     android:paddingStart="@dimen/padding_spacing_dp16"
                     android:paddingEnd="@dimen/padding_spacing_dp16"
                     app:theme="@style/BrandedSwitch" />
 
             </LinearLayout>
 
+            <!-- Pre-profile -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -214,15 +269,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/sub_setting_pre_profile_tip"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:nextFocusDown="@+id/et_next_profile"
+                    android:nextFocusUp="@+id/allow_insecure_url" />
 
             </LinearLayout>
 
+            <!-- Next-profile -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_spacing_dp16"
-                android:orientation="vertical">
+                android:background="@drawable/bg_tv_focus"
+                android:focusable="false"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_spacing_dp4">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -234,7 +295,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/sub_setting_pre_profile_tip"
-                    android:inputType="text" />
+                    android:inputType="text"
+                    android:nextFocusDown="@+id/et_remarks"
+                    android:nextFocusUp="@+id/et_pre_profile" />
 
             </LinearLayout>
         </LinearLayout>

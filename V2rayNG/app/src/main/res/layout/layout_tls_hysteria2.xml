@@ -5,13 +5,16 @@
     android:layout_marginTop="@dimen/padding_spacing_dp16"
     android:orientation="vertical">
 
+    <!-- Stream security -->
     <LinearLayout
         android:id="@+id/lay_stream_security"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,12 +32,16 @@
 
     </LinearLayout>
 
+    <!-- SNI -->
     <LinearLayout
         android:id="@+id/lay_sni"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/padding_spacing_dp16"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -50,12 +57,15 @@
 
     </LinearLayout>
 
-
+    <!-- Allow insecure + PinSHA256 -->
     <LinearLayout
         android:id="@+id/lay_allow_insecure"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
 
         <TextView
             android:layout_width="wrap_content"
@@ -70,26 +80,30 @@
             android:layout_marginBottom="@dimen/padding_spacing_dp8"
             android:entries="@array/allowinsecures" />
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/padding_spacing_dp16"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/server_lab_stream_pinsha256" />
-
-            <EditText
-                android:id="@+id/et_pinsha256"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-
-        </LinearLayout>
     </LinearLayout>
 
+    <!-- PinSHA256 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_spacing_dp16"
+        android:layout_marginTop="@dimen/padding_spacing_dp16"
+        android:background="@drawable/bg_tv_focus"
+        android:focusable="false"
+        android:orientation="vertical"
+        android:padding="@dimen/padding_spacing_dp4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/server_lab_stream_pinsha256" />
+
+        <EditText
+            android:id="@+id/et_pinsha256"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+    </LinearLayout>
 
 </LinearLayout>
