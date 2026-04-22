@@ -65,6 +65,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/view_height_dp64"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <!-- Test-state area, takes all width except FAB -->
@@ -99,7 +100,6 @@
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:layout_margin="@dimen/padding_spacing_dp8"
                 android:clickable="true"
                 android:contentDescription="@string/tasker_start_service"

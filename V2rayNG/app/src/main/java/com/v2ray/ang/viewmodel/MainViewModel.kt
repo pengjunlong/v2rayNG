@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicBoolean
@@ -58,6 +59,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val realPingDoneCount = AtomicInteger(0)
     private val realPingFastCount = AtomicInteger(0)
     private var realPingTotal = 0
+    /** 实际已发出的测试请求数（早停后可能小于 realPingTotal） */
+    private val realPingSentCount = AtomicInteger(0)
     /** Guards against invoking onBatchRealPingFinished() more than once per batch. */
     private val realPingFinishedOnce = AtomicBoolean(false)
 
@@ -257,6 +260,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         realPingEarlyStop.set(false)
         realPingDoneCount.set(0)
         realPingFastCount.set(0)
+        realPingSentCount.set(0)
         realPingFinishedOnce.set(false)
         realPingTotal = serversCache.size
 
@@ -265,6 +269,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             for (item in serversCopy) {
                 if (realPingEarlyStop.get()) break
                 MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG, item.guid)
+                realPingSentCount.incrementAndGet()
+                // 每发一条稍等，让回包有机会触发 earlyStop，避免一口气把所有请求发完
+                delay(SEND_INTERVAL_MS)
             }
         }
     }
@@ -502,16 +509,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     val done = realPingDoneCount.incrementAndGet()
                     val fastNow = realPingFastCount.get()
-                    val total = realPingTotal
+                    // 用实际已发出的数量作为分母，早停时显示真实进度
+                    val sent = realPingSentCount.get().takeIf { it > 0 } ?: realPingTotal
                     // Update test progress display
                     updateTestResultAction.value =
                         getApplication<AngApplication>().getString(
-                            R.string.connection_test_progress, done, total, fastNow
+                            R.string.connection_test_progress, done, sent, fastNow
                         )
 
-                    // Check if all (non-skipped) tests are done; guard against double-fire
-                    val shouldFinish = (done >= total) ||
-                        (realPingEarlyStop.get() && done >= minOf(total, FAST_NODE_TARGET))
+                    // 快节点达到目标 或 所有已发请求都收到回包，触发完成
+                    val shouldFinish = fastNow >= FAST_NODE_TARGET || done >= sent
                     if (shouldFinish && realPingFinishedOnce.compareAndSet(false, true)) {
                         onBatchRealPingFinished()
                     }
@@ -537,5 +544,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         /** Number of fast nodes that triggers early stop. */
         const val FAST_NODE_TARGET = 20
+
+        /** Interval between sending test requests (ms); gives in-flight results time to trigger earlyStop. */
+        const val SEND_INTERVAL_MS = 50L
     }
 }
