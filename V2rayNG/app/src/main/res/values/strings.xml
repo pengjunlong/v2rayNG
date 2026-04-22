@@ -455,4 +455,17 @@
         <item>WebDAV</item>
     </string-array>
 
+    <string name="intelligent_selection">Intelligent Selection</string>
+    <string name="pre_resolving_domain">Pre-resolving domain…</string>
+    <string name="summary_configuration_backup">Storage location: [%s], backup will be cleared after uninstalling or clearing storage</string>
+    <string name="title_create_intelligent_selection_all_server">Generate intelligent selection config for current group</string>
+    <string name="server_lab_stream_pinsha256">SHA256 Certificate Fingerprint</string>
+    <string name="summary_pref_promotion">Some promotion, click for details (donate to remove)</string>
+    <string name="sub_setting_intelligent_selection_filter">Alias Intelligent Selection Regex Filter</string>
+    <string name="title_intelligent_selection_method">Intelligent Selection Method</string>
+    <string-array name="intelligent_selection_method">
+        <item>Lowest Latency</item>
+        <item>Most Stable</item>
+    </string-array>
+
 </resources>
