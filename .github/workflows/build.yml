@@ -119,24 +119,6 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
-    # ── 修复 Maven Central 403（GitHub Actions IP 被限制）─────────────────────
-    # repo.maven.apache.org 对部分 CI IP 返回 403，repo1.maven.org 不受限
-    - name: Patch Gradle repos (Maven Central 403 workaround)
-      run: |
-        mkdir -p $HOME/.gradle
-        cat > $HOME/.gradle/init.gradle <<'EOF'
-        allprojects {
-          buildscript {
-            repositories {
-              maven { url = uri("https://repo1.maven.org/maven2") }
-            }
-          }
-          repositories {
-            maven { url = uri("https://repo1.maven.org/maven2") }
-          }
-        }
-        EOF
-
     # ── 从 Tag 解析版本号 ──────────────────────────────────────────────────────
     - name: Extract version from tag
       id: version
