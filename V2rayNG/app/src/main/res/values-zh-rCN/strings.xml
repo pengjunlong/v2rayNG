@@ -277,6 +277,7 @@
     <string name="title_exit_app">退出应用</string>
     <string name="title_fast_node_settings">快节点测试配置</string>
     <string name="title_fast_node_settings_dialog">早停配置</string>
+    <string name="title_ime_settings">输入法设置</string>
     <string name="label_fast_node_target">快节点目标数量（默认 %d 个）</string>
     <string name="label_fast_delay_threshold">快节点延迟阈值 ms（默认 %d ms）</string>
     <string name="toast_fast_node_settings_saved">已保存：目标 %d 个，阈值 %d ms</string>

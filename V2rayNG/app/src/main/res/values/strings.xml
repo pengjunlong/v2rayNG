@@ -305,6 +305,7 @@
     <string name="title_exit_app">Exit</string>
     <string name="title_fast_node_settings">Fast-node test settings</string>
     <string name="title_fast_node_settings_dialog">Early-Stop Settings</string>
+    <string name="title_ime_settings">Input method settings</string>
     <string name="label_fast_node_target">Fast-node target count (default %d)</string>
     <string name="label_fast_delay_threshold">Fast-node delay threshold ms (default %d)</string>
     <string name="toast_fast_node_settings_saved">Settings saved: target=%d, threshold=%dms</string>

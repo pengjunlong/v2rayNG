@@ -435,6 +435,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             true
         }
 
+        R.id.ime_settings -> {
+            startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS))
+            true
+        }
+
         R.id.fab -> {
             if (mainViewModel.isRunning.value == true) {
                 V2RayServiceManager.stopVService(this)
