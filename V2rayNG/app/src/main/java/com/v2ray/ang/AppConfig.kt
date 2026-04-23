@@ -150,6 +150,7 @@ object AppConfig {
     const val MSG_MEASURE_CONFIG_CANCEL = 72
     const val MSG_MEASURE_CONFIG_NOTIFY = 73  // progress: "done/total/fast"
     const val MSG_MEASURE_CONFIG_FINISH = 74  // all tests done
+    const val MSG_MEASURE_CONFIG_BATCH = 75   // batch test with full guid list
 
     /** Notification channel IDs and names. */
     const val RAY_NG_CHANNEL_ID = "RAY_NG_M_CH_ID"

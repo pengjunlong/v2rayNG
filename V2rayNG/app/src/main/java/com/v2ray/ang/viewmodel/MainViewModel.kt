@@ -25,17 +25,12 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.SpeedtestManager
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
-import com.v2ray.ang.viewmodel.MainViewModel.Companion.FAST_DELAY_THRESHOLD_MS
-import com.v2ray.ang.viewmodel.MainViewModel.Companion.FAST_NODE_TARGET
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Collections
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serverList = MmkvManager.decodeServerList()
@@ -54,15 +49,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /** One-shot callback invoked when the batch real-ping test finishes. */
     var onTestsFinishedCallback: (() -> Unit)? = null
 
-    // --- real-ping batch progress tracking ---
-    private val realPingEarlyStop = AtomicBoolean(false)
-    private val realPingDoneCount = AtomicInteger(0)
-    private val realPingFastCount = AtomicInteger(0)
-    private var realPingTotal = 0
-    /** 实际已发出的测试请求数（早停后可能小于 realPingTotal） */
-    private val realPingSentCount = AtomicInteger(0)
-    /** Guards against invoking onBatchRealPingFinished() more than once per batch. */
-    private val realPingFinishedOnce = AtomicBoolean(false)
 
     /**
      * Refer to the official documentation for [registerReceiver](https://developer.android.com/reference/androidx/core/content/ContextCompat#registerReceiver(android.content.Context,android.content.BroadcastReceiver,android.content.IntentFilter,int):
@@ -248,32 +234,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * Tests the real ping for all servers.
-     * Supports early-stop: once [FAST_NODE_TARGET] nodes with delay ≤ [FAST_DELAY_THRESHOLD_MS]
-     * are found, pending tasks are skipped silently.
+     * Early-stop is handled inside V2RayTestService: once [FAST_NODE_TARGET] fast nodes are
+     * found the service stops launching new tests. Progress is reported via
+     * MSG_MEASURE_CONFIG_NOTIFY and completion via MSG_MEASURE_CONFIG_FINISH.
      */
     fun testAllRealPing() {
         MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG_CANCEL, "")
         MmkvManager.clearAllTestDelayResults(serversCache.map { it.guid }.toList())
         updateListAction.value = -1
 
-        // Reset batch state
-        realPingEarlyStop.set(false)
-        realPingDoneCount.set(0)
-        realPingFastCount.set(0)
-        realPingSentCount.set(0)
-        realPingFinishedOnce.set(false)
-        realPingTotal = serversCache.size
-
-        val serversCopy = serversCache.toList()
-        viewModelScope.launch(Dispatchers.IO) {
-            for (item in serversCopy) {
-                if (realPingEarlyStop.get()) break
-                MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG, item.guid)
-                realPingSentCount.incrementAndGet()
-                // 每发一条稍等，让回包有机会触发 earlyStop，避免一口气把所有请求发完
-                delay(SEND_INTERVAL_MS)
-            }
-        }
+        // Send all guids at once; early-stop is managed in the service
+        val guids = ArrayList(serversCache.map { it.guid })
+        MessageUtil.sendMsg2TestService(getApplication(), AppConfig.MSG_MEASURE_CONFIG_BATCH, guids)
     }
 
     /**
@@ -494,32 +466,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 AppConfig.MSG_MEASURE_CONFIG_SUCCESS -> {
+                    // 单条结果回来：更新存储和列表项
                     val resultPair = intent.serializable<Pair<String, Long>>("content") ?: return
                     MmkvManager.encodeServerTestDelayMillis(resultPair.first, resultPair.second)
                     updateListAction.value = getPosition(resultPair.first)
+                }
 
-                    // Track fast nodes for early-stop
-                    val delay = resultPair.second
-                    if (delay in 1..FAST_DELAY_THRESHOLD_MS) {
-                        val fast = realPingFastCount.incrementAndGet()
-                        if (fast >= FAST_NODE_TARGET) {
-                            realPingEarlyStop.set(true)
-                        }
-                    }
-
-                    val done = realPingDoneCount.incrementAndGet()
-                    val fastNow = realPingFastCount.get()
-                    // 用实际已发出的数量作为分母，早停时显示真实进度
-                    val sent = realPingSentCount.get().takeIf { it > 0 } ?: realPingTotal
-                    // Update test progress display
+                AppConfig.MSG_MEASURE_CONFIG_NOTIFY -> {
+                    // 进度通知："done/total/fast"
+                    val content = intent.getStringExtra("content") ?: return
+                    val parts = content.split("/")
+                    val done = parts.getOrNull(0)?.trim()?.toIntOrNull() ?: 0
+                    val total = parts.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
+                    val fast = parts.getOrNull(2)?.trim()?.toIntOrNull() ?: 0
                     updateTestResultAction.value =
                         getApplication<AngApplication>().getString(
-                            R.string.connection_test_progress, done, sent, fastNow
+                            R.string.connection_test_progress, done, total, fast
                         )
+                }
 
-                    // 快节点达到目标 或 所有已发请求都收到回包，触发完成
-                    val shouldFinish = fastNow >= FAST_NODE_TARGET || done >= sent
-                    if (shouldFinish && realPingFinishedOnce.compareAndSet(false, true)) {
+                AppConfig.MSG_MEASURE_CONFIG_FINISH -> {
+                    // 批量测试全部完成
+                    val content = intent.getStringExtra("content")
+                    if (content == "0") {
                         onBatchRealPingFinished()
                     }
                 }
@@ -539,13 +508,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     companion object {
-        /** Delay threshold (ms) below which a node is considered "fast". */
-        const val FAST_DELAY_THRESHOLD_MS = 300L
-
-        /** Number of fast nodes that triggers early stop. */
-        const val FAST_NODE_TARGET = 20
-
-        /** Interval between sending test requests (ms); gives in-flight results time to trigger earlyStop. */
-        const val SEND_INTERVAL_MS = 50L
     }
 }

@@ -3,6 +3,7 @@ package com.v2ray.ang.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.v2ray.ang.AppConfig
 import com.v2ray.ang.AppConfig.MSG_MEASURE_CONFIG
 import com.v2ray.ang.AppConfig.MSG_MEASURE_CONFIG_CANCEL
 import com.v2ray.ang.AppConfig.MSG_MEASURE_CONFIG_SUCCESS
@@ -15,76 +16,132 @@ import com.v2ray.ang.handler.V2rayConfigManager
 import com.v2ray.ang.util.MessageUtil
 import com.v2ray.ang.util.Utils
 import go.Seq
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import libv2ray.Libv2ray
-import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 class V2RayTestService : Service() {
-    private val realTestScope by lazy { CoroutineScope(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()).asCoroutineDispatcher()) }
 
-    /**
-     * Initializes the V2Ray environment.
-     */
+    private var batchJob = SupervisorJob()
+    private var batchScope = CoroutineScope(batchJob + Dispatchers.IO + CoroutineName("RealPingBatch"))
+    private val earlyStop = AtomicBoolean(false)
+
+    companion object {
+        /** Max concurrent native ping calls. */
+        const val CONCURRENCY = 8
+
+        /** Delay threshold (ms) below which a node is considered "fast". */
+        const val FAST_DELAY_THRESHOLD_MS = 300L
+
+        /** Number of fast nodes that triggers early stop. */
+        const val FAST_NODE_TARGET = 20
+    }
+
     override fun onCreate() {
         super.onCreate()
         Seq.setContext(this)
         Libv2ray.initCoreEnv(Utils.userAssetPath(this), Utils.getDeviceIdForXUDPBaseKey())
     }
 
-    /**
-     * Handles the start command for the service.
-     * @param intent The intent.
-     * @param flags The flags.
-     * @param startId The start ID.
-     * @return The start mode.
-     */
+    override fun onBind(intent: Intent?): IBinder? = null
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.getIntExtra("key", 0)) {
             MSG_MEASURE_CONFIG -> {
                 val guid = intent.serializable<String>("content") ?: ""
-                realTestScope.launch {
+                // 单条测试（非批量，如当前节点延迟测试）
+                batchScope.launch {
                     val result = startRealPing(guid)
                     MessageUtil.sendMsg2UI(this@V2RayTestService, MSG_MEASURE_CONFIG_SUCCESS, Pair(guid, result))
                 }
             }
 
+            AppConfig.MSG_MEASURE_CONFIG_BATCH -> {
+                // 批量测试：取消旧批次，重新开始
+                cancelBatch()
+                @Suppress("UNCHECKED_CAST")
+                val guids = intent.serializable<ArrayList<String>>("content") ?: return super.onStartCommand(intent, flags, startId)
+                startBatch(guids)
+            }
+
             MSG_MEASURE_CONFIG_CANCEL -> {
-                realTestScope.coroutineContext[Job]?.cancelChildren()
+                cancelBatch()
             }
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
-    /**
-     * Binds the service.
-     * @param intent The intent.
-     * @return The binder.
-     */
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    private fun startBatch(guids: List<String>) {
+        earlyStop.set(false)
+        val semaphore = Semaphore(CONCURRENCY)
+        val doneCount = AtomicInteger(0)
+        val fastCount = AtomicInteger(0)
+        val total = guids.size
+
+        val jobs = guids.map { guid ->
+            batchScope.launch {
+                // 在获取 semaphore 前先检查 early-stop
+                if (earlyStop.get()) return@launch
+
+                semaphore.acquire()
+                try {
+                    // 获取 semaphore 后再次检查（等待期间可能已触发）
+                    if (earlyStop.get()) return@launch
+
+                    val result = startRealPing(guid)
+                    MessageUtil.sendMsg2UI(this@V2RayTestService, MSG_MEASURE_CONFIG_SUCCESS, Pair(guid, result))
+
+                    // 统计快节点，达标时设置 earlyStop
+                    if (result in 1..FAST_DELAY_THRESHOLD_MS) {
+                        if (fastCount.incrementAndGet() >= FAST_NODE_TARGET) {
+                            earlyStop.set(true)
+                        }
+                    }
+
+                    // 进度通知：done/total/fast
+                    val done = doneCount.incrementAndGet()
+                    val fast = fastCount.get()
+                    MessageUtil.sendMsg2UI(
+                        this@V2RayTestService,
+                        AppConfig.MSG_MEASURE_CONFIG_NOTIFY,
+                        "$done/$total/$fast"
+                    )
+                } finally {
+                    semaphore.release()
+                }
+            }
+        }
+
+        // 等所有 coroutine 结束后通知完成
+        batchScope.launch {
+            joinAll(*jobs.toTypedArray())
+            MessageUtil.sendMsg2UI(this@V2RayTestService, AppConfig.MSG_MEASURE_CONFIG_FINISH, "0")
+        }
     }
 
-    /**
-     * Starts the real ping test.
-     * @param guid The GUID of the configuration.
-     * @return The ping result.
-     */
+    private fun cancelBatch() {
+        earlyStop.set(true)
+        batchJob.cancel()
+        // 重建 scope 供下次使用
+        batchJob = SupervisorJob()
+        batchScope = CoroutineScope(batchJob + Dispatchers.IO + CoroutineName("RealPingBatch"))
+    }
+
     private fun startRealPing(guid: String): Long {
         val retFailure = -1L
-
         val config = MmkvManager.decodeServerConfig(guid) ?: return retFailure
         if (config.configType == EConfigType.HYSTERIA2) {
-            val delay = PluginServiceManager.realPingHy2(this, config)
-            return delay
+            return PluginServiceManager.realPingHy2(this, config)
         } else {
             val configResult = V2rayConfigManager.getV2rayConfig4Speedtest(this, guid)
-            if (!configResult.status) {
-                return retFailure
-            }
+            if (!configResult.status) return retFailure
             return SpeedtestManager.realPing(configResult.content)
         }
     }
