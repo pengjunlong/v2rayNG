@@ -14,7 +14,7 @@
 | 测试进度显示 | `MainViewModel.kt`、`strings.xml` | 底部状态栏实时显示「已完成/总数/⚡快节点数」 |
 | 退出应用菜单 | `MainActivity.kt`、`menu_main.xml`、`strings.xml` | 溢出菜单新增「退出」，停止 VPN 服务后调用 `finishAffinity()` 彻底关闭进程，避免后台误杀 |
 | MENU 键打开侧栏 | `MainActivity.kt` | 遥控器 MENU 键（或红色键）打开/关闭侧滑导航抽屉；BACK 键在抽屉打开时优先关闭抽屉 |
-| 防止服务后台被杀 | `V2RayVpnService.kt`、`V2RayProxyOnlyService.kt`、`AndroidManifest.xml` | VPN/Proxy 服务 `onCreate` 申请 `PARTIAL_WAKE_LOCK`，`onDestroy` 释放，防止 TV 盒子切后台后 CPU 休眠导致断连 |
+| 防止服务后台被杀 | `V2RayVpnService.kt`、`V2RayProxyOnlyService.kt`、`AndroidManifest.xml` | VPN/Proxy 服务 `onCreate` 申请 `PARTIAL_WAKE_LOCK`，`onDestroy` 释放，防止 TV 盒子切后台后 CPU 休眠导致断连；配合看门狗机制（见第六节）彻底防止进程被清理 |
 
 ### 二、焦点高亮（遥控器导航视觉反馈）
 
@@ -22,12 +22,13 @@
 
 | 文件 | 作用范围 |
 |---|---|
-| `drawable/bg_tv_focus.xml` | 通用焦点 selector（列表项、底部状态栏、表单行等） |
-| `drawable/bg_toolbar_item_focus.xml` | Toolbar 图标（搜索、加号、三点菜单） |
+| `drawable/bg_tv_focus.xml` | 通用焦点 selector（主列表 `info_container`、分享/编辑/删除/更多操作按钮等）；聚焦色 `#CC`（80% 橙色），高对比度 |
+| `drawable/bg_toolbar_item_focus.xml` | Toolbar 图标（搜索、启停、加号、三点菜单）；聚焦色同为 80% 橙色 |
 | `drawable/bg_dialog_button_focus.xml` | AlertDialog 确定/取消按钮 |
-| `drawable/bg_nav_item_focus.xml` | 侧栏 NavigationView 菜单项 |
+| `drawable/bg_nav_item_focus.xml` | 侧栏 NavigationView 菜单项；聚焦色从 `#33`（20%）升至 `#CC`（80%） |
+| `drawable/bg_popup_menu_item_focus.xml` | **新增**：右侧三点溢出菜单弹出层条目焦点高亮 |
 | `drawable/bg_tab_item_focus.xml` | TabLayout 订阅分组 Tab |
-| `values/themes.xml` | 注入 `actionBarItemBackground`、`buttonBarButtonStyle` 使 Toolbar 按钮和弹窗按钮全局生效 |
+| `values/themes.xml` | 注入 `actionBarItemBackground`、`buttonBarButtonStyle`、`actionOverflowButtonStyle`、`toolbarNavigationButtonStyle`、`popupMenuStyle`、`listPopupWindowStyle`，使 Toolbar 按钮、弹窗按钮、溢出菜单条目全局生效 |
 | `values-night/themes.xml` | 同步注入夜间主题，保证深色模式下一致 |
 
 ### 三、布局 TV 化改造
@@ -62,6 +63,52 @@
 | 文件 | 说明 |
 |---|---|
 | `.github/workflows/build.yml` | 仅构建 `arm64-v8a` 架构；Tag 推送时触发 GitHub Release 并自动上传 APK；使用 `playstore` flavor（包名 `com.v2ray.ang`）直接侧载安装 |
+
+### 六、进程保活（看门狗，Android 6 TV 专项）
+
+> 解决 TV 盒子按 **Home 键** 或 **切换其他 App** 后代理服务被系统清理的问题。
+
+#### 保活机制分层设计
+
+| 层级 | 方案 | 覆盖场景 |
+|---|---|---|
+| L1 服务声明 | `android:stopWithTask="false"` | 划掉 App 卡片时不随 Activity 销毁服务 |
+| L2 独立进程 | `android:process=":RunSoLibV2RayDaemon"` | 服务与 UI 进程隔离，UI 被杀不影响服务 |
+| L3 WakeLock | `PARTIAL_WAKE_LOCK` | 服务运行期间保持 CPU 唤醒 |
+| L4 看门狗心跳 | `AlarmManager.setExactAndAllowWhileIdle` | Doze 模式下每 30 秒检查一次服务存活 |
+| L5 开机自启 | `BOOT_COMPLETED` + `LOCKED_BOOT_COMPLETED` | 开机/加密前就能自动拉起服务 |
+
+#### 新增文件
+
+| 文件 | 说明 |
+|---|---|
+| `util/WatchdogHelper.kt` | 看门狗工具类，封装 `AlarmManager` 心跳调度。API 23+ 使用 `setExactAndAllowWhileIdle`（穿透 Doze）；API 21-22 使用 `setExact`；幂等设计，重复调用只更新触发时间 |
+| `receiver/RestartServiceReceiver.kt` | 看门狗触发后的处理 Receiver：服务存活则续期下一次心跳，服务已死则重新拉起并续期，形成**滚动心跳链** |
+
+#### 改动文件
+
+| 文件 | 改动说明 |
+|---|---|
+| `AndroidManifest.xml` | 两个服务添加 `stopWithTask="false"`；BootReceiver 添加 `directBootAware="true"` 及 `LOCKED_BOOT_COMPLETED`；注册 `RestartServiceReceiver`；添加 `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` 权限 |
+| `AppConfig.kt` | 新增 `ACTION_RESTART_SERVICE`、`WATCHDOG_INTERVAL_MS = 30_000L` 常量 |
+| `V2RayVpnService.kt` | `onCreate` 调用 `WatchdogHelper.schedule()`；新增 `onTaskRemoved` 在划掉 App 时触发心跳 |
+| `V2RayProxyOnlyService.kt` | 同上 |
+| `V2RayServiceManager.kt` | `stopVService` 先调用 `WatchdogHelper.cancel()` 确保用户主动停止时不再自动重启 |
+| `receiver/BootReceiver.kt` | 开机后同时调用 `WatchdogHelper.schedule()` 注册看门狗 |
+
+#### 保活工作流
+
+```
+服务启动
+  └─ WatchdogHelper.schedule()  ← 30s 倒计时开始
+          ↓ 30秒后（AlarmManager 触发）
+  RestartServiceReceiver.onReceive()
+    ├─ 服务存活 → schedule() 续期心跳 → 等待下一次
+    └─ 服务已死 → startVService() → schedule() 续期心跳
+
+用户主动停止
+  └─ WatchdogHelper.cancel()  ← 心跳链断开，不再自动重启
+```
 
 ---
 

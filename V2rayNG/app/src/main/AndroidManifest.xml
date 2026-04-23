@@ -45,6 +45,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- TV/Android6: 申请忽略电池优化，避免后台被杀 -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- TV/Android6: 重启服务广播权限 -->
+    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
 
     <application
         android:name=".AngApplication"
@@ -53,6 +57,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
+        tools:ignore="UnusedAttribute"
         android:supportsRtl="true"
         android:theme="@style/AppThemeDayNight"
         android:usesCleartextTraffic="true"
@@ -159,7 +164,8 @@
             android:foregroundServiceType="specialUse"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:process=":RunSoLibV2RayDaemon">
+            android:process=":RunSoLibV2RayDaemon"
+            android:stopWithTask="false">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
@@ -176,7 +182,8 @@
             android:exported="false"
             android:foregroundServiceType="specialUse"
             android:label="@string/app_name"
-            android:process=":RunSoLibV2RayDaemon">
+            android:process=":RunSoLibV2RayDaemon"
+            android:stopWithTask="false">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="proxy" />
@@ -203,9 +210,23 @@
         <receiver
             android:name=".receiver.BootReceiver"
             android:exported="true"
-            android:label="BootReceiver">
+            android:directBootAware="true"
+            android:label="BootReceiver"
+            tools:ignore="UnusedAttribute">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- Android 7+ 直接启动支持，加密前就能收到 -->
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- TV/Android6: 服务被杀后自动重启的守护 Receiver -->
+        <receiver
+            android:name=".receiver.RestartServiceReceiver"
+            android:exported="false"
+            android:process=":RunSoLibV2RayDaemon">
+            <intent-filter>
+                <action android:name="${applicationId}.action.RESTART_SERVICE" />
             </intent-filter>
         </receiver>
 

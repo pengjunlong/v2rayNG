@@ -25,6 +25,7 @@ import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.V2RayServiceManager
 import com.v2ray.ang.util.MyContextWrapper
 import com.v2ray.ang.util.Utils
+import com.v2ray.ang.util.WatchdogHelper
 import java.lang.ref.SoftReference
 
 class V2RayVpnService : VpnService(), ServiceControl {
@@ -80,6 +81,8 @@ class V2RayVpnService : VpnService(), ServiceControl {
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "v2rayNG:VpnWakeLock")
         wakeLock?.setReferenceCounted(false)
         wakeLock?.acquire()
+        // TV/Android6: 启动看门狗心跳
+        WatchdogHelper.schedule(this)
     }
 
     override fun onRevoke() {
@@ -96,6 +99,17 @@ class V2RayVpnService : VpnService(), ServiceControl {
         NotificationManager.cancelNotification()
         wakeLock?.release()
         wakeLock = null
+    }
+
+    /**
+     * TV/Android6: 用户从最近任务划掉 App 时调用。
+     * 此时服务仍在独立进程 :RunSoLibV2RayDaemon，不会立即被杀，
+     * 但调度一个看门狗心跳，确保即使进程被杀也能通过 RestartServiceReceiver 重拉。
+     */
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        Log.i(AppConfig.TAG, "V2RayVpnService: onTaskRemoved, scheduling watchdog")
+        WatchdogHelper.schedule(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

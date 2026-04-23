@@ -17,8 +17,8 @@ import com.v2ray.ang.service.ServiceControl
 import com.v2ray.ang.service.V2RayProxyOnlyService
 import com.v2ray.ang.service.V2RayVpnService
 import com.v2ray.ang.util.MessageUtil
-import com.v2ray.ang.handler.PluginServiceManager
 import com.v2ray.ang.util.Utils
+import com.v2ray.ang.util.WatchdogHelper
 import go.Seq
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +73,8 @@ object V2RayServiceManager {
      */
     fun stopVService(context: Context) {
         context.toast(R.string.toast_services_stop)
+        // TV/Android6: 用户主动停止时取消看门狗，避免它再次重启服务
+        WatchdogHelper.cancel(context)
         MessageUtil.sendMsg2Service(context, AppConfig.MSG_STATE_STOP, "")
     }
 

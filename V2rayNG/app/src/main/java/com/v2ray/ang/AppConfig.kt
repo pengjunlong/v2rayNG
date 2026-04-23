@@ -78,6 +78,10 @@ object AppConfig {
     const val BROADCAST_ACTION_SERVICE = "$ANG_PACKAGE.action.service"
     const val BROADCAST_ACTION_ACTIVITY = "$ANG_PACKAGE.action.activity"
     const val BROADCAST_ACTION_WIDGET_CLICK = "$ANG_PACKAGE.action.widget.click"
+    /** TV/Android6: 服务被杀后由 RestartServiceReceiver 接收并重启代理 */
+    const val ACTION_RESTART_SERVICE = "$ANG_PACKAGE.action.RESTART_SERVICE"
+    /** TV/Android6: AlarmManager 看门狗心跳间隔（毫秒），每 30 秒检查一次 */
+    const val WATCHDOG_INTERVAL_MS = 30_000L
 
     /** Tasker extras. */
     const val TASKER_EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE"

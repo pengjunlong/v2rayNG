@@ -6,10 +6,13 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import androidx.annotation.RequiresApi
+import com.v2ray.ang.AppConfig
 import com.v2ray.ang.handler.SettingsManager
 import com.v2ray.ang.handler.V2RayServiceManager
 import com.v2ray.ang.util.MyContextWrapper
+import com.v2ray.ang.util.WatchdogHelper
 import java.lang.ref.SoftReference
 
 class V2RayProxyOnlyService : Service(), ServiceControl {
@@ -26,6 +29,8 @@ class V2RayProxyOnlyService : Service(), ServiceControl {
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "v2rayNG:ProxyWakeLock")
         wakeLock?.setReferenceCounted(false)
         wakeLock?.acquire()
+        // TV/Android6: 启动看门狗心跳
+        WatchdogHelper.schedule(this)
     }
 
     /**
@@ -48,6 +53,15 @@ class V2RayProxyOnlyService : Service(), ServiceControl {
         V2RayServiceManager.stopCoreLoop()
         wakeLock?.release()
         wakeLock = null
+    }
+
+    /**
+     * TV/Android6: 用户从最近任务划掉 App 时调用，调度看门狗心跳。
+     */
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        Log.i(AppConfig.TAG, "V2RayProxyOnlyService: onTaskRemoved, scheduling watchdog")
+        WatchdogHelper.schedule(this)
     }
 
     /**
