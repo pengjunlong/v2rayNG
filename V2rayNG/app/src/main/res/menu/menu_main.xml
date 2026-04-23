@@ -7,10 +7,20 @@
         android:title="@string/menu_item_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
+    <!-- 启停按钮：固定在 Toolbar 上，遥控器方向键可直接聚焦 -->
+    <item
+        android:id="@+id/fab"
+        android:icon="@drawable/ic_play_24dp"
+        android:title="@string/tasker_start_service"
+        app:showAsAction="always" />
     <!-- TV首要操作：一键更新订阅+测试+排序，放在溢出菜单最顶部方便遥控器选中 -->
     <item
         android:id="@+id/sub_update_and_test_and_sort"
         android:title="@string/title_sub_update_and_test_and_sort"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/exit_app"
+        android:title="@string/title_exit_app"
         app:showAsAction="never" />
     <item
         android:id="@+id/sub_update"
@@ -107,8 +117,5 @@
         android:id="@+id/sort_by_test_results"
         android:title="@string/title_sort_by_test_results"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/exit_app"
-        android:title="@string/title_exit_app"
-        app:showAsAction="never" />
+
 </menu>

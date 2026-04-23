@@ -15,8 +15,12 @@
     <style name="AppThemeDayNight.NoActionBar" parent="AppThemeDayNight">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <!-- TV: Toolbar icon / overflow-menu button focus highlight -->
+        <!-- TV: Toolbar action items focus highlight -->
         <item name="actionBarItemBackground">@drawable/bg_toolbar_item_focus</item>
+        <!-- TV: 右侧三点溢出按钮焦点样式 -->
+        <item name="actionOverflowButtonStyle">@style/TvOverflowButtonStyle</item>
+        <!-- TV: 左侧汉堡/返回按钮焦点样式 -->
+        <item name="toolbarNavigationButtonStyle">@style/TvToolbarNavButtonStyle</item>
     </style>
 
 </resources>

@@ -51,7 +51,6 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:nextFocusDown="@+id/layout_test"
-            android:nextFocusRight="@+id/fab"
             android:nextFocusUp="@+id/tab_group"
             android:scrollbars="vertical" />
 
@@ -61,24 +60,23 @@
             android:layout_height="1dp"
             android:background="@color/divider_color_light" />
 
-        <!-- Bottom bar: test state (left) + FAB (right), always visible -->
+        <!-- Bottom bar: 背景色反映运行状态（绿=运行，红=停止） -->
         <LinearLayout
+            android:id="@+id/bottom_bar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/view_height_dp64"
+            android:background="@color/color_bottom_bar_stopped"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- Test-state area, takes all width except FAB -->
+            <!-- Test-state area -->
             <LinearLayout
                 android:id="@+id/layout_test"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:background="@drawable/bg_tv_focus"
                 android:clickable="true"
                 android:focusable="true"
-                android:nextFocusLeft="@+id/recycler_view"
-                android:nextFocusRight="@+id/fab"
                 android:nextFocusUp="@+id/recycler_view"
                 android:orientation="vertical">
 
@@ -91,22 +89,10 @@
                     android:minLines="1"
                     android:paddingStart="@dimen/padding_spacing_dp16"
                     android:text="@string/connection_test_pending"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:textColor="@android:color/white" />
 
             </LinearLayout>
-
-            <!-- FAB embedded in the bottom bar — always reachable via D-pad RIGHT from any row -->
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/padding_spacing_dp8"
-                android:clickable="true"
-                android:contentDescription="@string/tasker_start_service"
-                android:focusable="true"
-                android:nextFocusLeft="@+id/layout_test"
-                android:nextFocusUp="@+id/recycler_view"
-                android:src="@drawable/ic_play_24dp" />
 
         </LinearLayout>
 

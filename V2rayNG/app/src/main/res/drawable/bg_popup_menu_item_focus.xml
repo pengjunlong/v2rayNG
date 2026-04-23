@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Toolbar / 溢出菜单图标焦点高亮 selector（TV遥控器） -->
+<!-- 溢出菜单 / PopupMenu 条目 TV 焦点高亮 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 聚焦：橙色实心背景 + 加粗边框，在浅色 Toolbar 上清晰可见 -->
+    <!-- 聚焦：橙色实心背景，在深色弹出菜单背景上清晰可见 -->
     <item android:state_focused="true" android:state_pressed="false">
         <shape android:shape="rectangle">
             <solid android:color="#CCf97910" />
             <stroke android:width="2dp" android:color="#f97910" />
-            <corners android:radius="6dp" />
+            <corners android:radius="4dp" />
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <solid android:color="#f97910" />
-            <corners android:radius="6dp" />
+            <corners android:radius="4dp" />
         </shape>
     </item>
     <item>

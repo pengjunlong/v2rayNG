@@ -23,8 +23,34 @@
     <style name="AppThemeDayNight.NoActionBar" parent="AppThemeDayNight">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <!-- TV: Toolbar icon / overflow-menu button focus highlight -->
+        <!-- TV: Toolbar action items (search, play/stop, add…) focus highlight -->
         <item name="actionBarItemBackground">@drawable/bg_toolbar_item_focus</item>
+        <!-- TV: 右侧三点溢出按钮焦点样式 -->
+        <item name="actionOverflowButtonStyle">@style/TvOverflowButtonStyle</item>
+        <!-- TV: 左侧汉堡/返回按钮焦点样式 -->
+        <item name="toolbarNavigationButtonStyle">@style/TvToolbarNavButtonStyle</item>
+        <!-- TV: 溢出菜单弹出层条目焦点样式 -->
+        <item name="popupMenuStyle">@style/TvPopupMenuStyle</item>
+        <item name="listPopupWindowStyle">@style/TvPopupMenuStyle</item>
+    </style>
+
+    <!-- TV: 右侧三点溢出按钮 -->
+    <style name="TvOverflowButtonStyle" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:background">@drawable/bg_toolbar_item_focus</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- TV: 左侧汉堡 / 返回按钮 -->
+    <style name="TvToolbarNavButtonStyle" parent="Widget.AppCompat.Toolbar.Button.Navigation">
+        <item name="android:background">@drawable/bg_toolbar_item_focus</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+
+    <!-- TV: 溢出菜单弹出层，条目背景使用 bg_popup_menu_item_focus -->
+    <style name="TvPopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:itemBackground">@drawable/bg_popup_menu_item_focus</item>
     </style>
 
     <!-- Base application theme. -->

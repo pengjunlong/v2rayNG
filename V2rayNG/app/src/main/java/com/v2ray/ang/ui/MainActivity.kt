@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
@@ -130,20 +129,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         title = getString(R.string.title_server)
         setSupportActionBar(binding.toolbar)
 
-        binding.fab.setOnClickListener {
-            if (mainViewModel.isRunning.value == true) {
-                V2RayServiceManager.stopVService(this)
-            } else if ((MmkvManager.decodeSettingsString(AppConfig.PREF_MODE) ?: VPN) == VPN) {
-                val intent = VpnService.prepare(this)
-                if (intent == null) {
-                    startV2Ray()
-                } else {
-                    requestVpnPermission.launch(intent)
-                }
-            } else {
-                startV2Ray()
-            }
-        }
+        // 启停逻辑由 toolbar menu item (R.id.fab) 触发，见 onOptionsItemSelected
         binding.layoutTest.setOnClickListener {
             if (mainViewModel.isRunning.value == true) {
                 setTestState(getString(R.string.connection_test_testing))
@@ -211,16 +197,27 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         }
         mainViewModel.isRunning.observe(this) { isRunning ->
             adapter.isRunning = isRunning
+            // 更新 toolbar 启停按钮图标
+            binding.toolbar.menu?.findItem(R.id.fab)?.apply {
+                if (isRunning) {
+                    setIcon(R.drawable.ic_stop_24dp)
+                    title = getString(R.string.action_stop_service)
+                } else {
+                    setIcon(R.drawable.ic_play_24dp)
+                    title = getString(R.string.tasker_start_service)
+                }
+            }
+            // 底部栏背景色：绿=运行，红=停止
+            binding.bottomBar.setBackgroundColor(
+                ContextCompat.getColor(
+                    this,
+                    if (isRunning) R.color.color_bottom_bar_running else R.color.color_bottom_bar_stopped
+                )
+            )
             if (isRunning) {
-                binding.fab.setImageResource(R.drawable.ic_stop_24dp)
-                binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_active))
-                binding.fab.contentDescription = getString(R.string.action_stop_service)
                 setTestState(getString(R.string.connection_connected))
                 binding.layoutTest.isFocusable = true
             } else {
-                binding.fab.setImageResource(R.drawable.ic_play_24dp)
-                binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.color_fab_inactive))
-                binding.fab.contentDescription = getString(R.string.tasker_start_service)
                 setTestState(getString(R.string.connection_not_connected))
                 binding.layoutTest.isFocusable = false
             }
@@ -428,6 +425,22 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         R.id.exit_app -> {
             exitApp()
+            true
+        }
+
+        R.id.fab -> {
+            if (mainViewModel.isRunning.value == true) {
+                V2RayServiceManager.stopVService(this)
+            } else if ((MmkvManager.decodeSettingsString(AppConfig.PREF_MODE) ?: VPN) == VPN) {
+                val intent = VpnService.prepare(this)
+                if (intent == null) {
+                    startV2Ray()
+                } else {
+                    requestVpnPermission.launch(intent)
+                }
+            } else {
+                startV2Ray()
+            }
             true
         }
 
