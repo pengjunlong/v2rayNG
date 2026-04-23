@@ -22,11 +22,11 @@ ln -s $__dir/libancillary libancillary
 $NDK_HOME/ndk-build \
 	NDK_PROJECT_PATH=. \
 	APP_BUILD_SCRIPT=./tun2socks.mk \
-	APP_ABI=all \
+	 "APP_ABI=${BUILD_ABI:-arm64-v8a}" \
 	APP_PLATFORM=android-21 \
 	NDK_LIBS_OUT=$TMPDIR/libs \
 	NDK_OUT=$TMPDIR/tmp \
-	APP_SHORT_COMMANDS=false LOCAL_SHORT_COMMANDS=false -B -j4
+	APP_SHORT_COMMANDS=false LOCAL_SHORT_COMMANDS=false -B -j$(nproc)
 cp -r $TMPDIR/libs $__dir/
 popd
 rm -rf $TMPDIR

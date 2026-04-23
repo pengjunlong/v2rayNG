@@ -14,59 +14,67 @@ concurrency:
 permissions:
   contents: write   # release job 需要写权限创建 GitHub Release
 
+# ── 全局：只构建 arm64-v8a ─────────────────────────────────────────────────────
+env:
+  BUILD_ABI: arm64-v8a
+  NDK_VERSION: 28.2.13676358
+
 jobs:
   build:
     name: Release
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45   # 仅 arm64，缩短超时
 
     steps:
+    # ── 1. Checkout ────────────────────────────────────────────────────────────
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
-        fetch-depth: '0'
+        fetch-depth: '1'          # 只拉最新一次提交，changelog 用 tag 范围查即可
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3.2.0
+    # ── 2. NDK（用 ndk-install action，比 sdkmanager 快约 1~2 min）─────────────
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
       with:
-        log-accepted-android-sdk-licenses: false
-        cmdline-tools-version: '12266719'
-        packages: 'platforms;android-35 build-tools;35.0.0 platform-tools'
+        ndk-version: r28b          # 28.2.x 对应 r28b
+        add-to-path: false
 
-    - name: Install NDK
+    - name: Set NDK_HOME env
       run: |
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-          --channel=0 \
-          --install "ndk;28.2.13676358"
-        echo "NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> $GITHUB_ENV
+        echo "NDK_HOME=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+        # 写入 ndkVersion 到 build.gradle.kts（与旧逻辑一致）
         sed -i '10i\
         \
-            ndkVersion = "28.2.13676358"' ${{ github.workspace }}/V2rayNG/app/build.gradle.kts
+            ndkVersion = "${{ env.NDK_VERSION }}"' \
+          ${{ github.workspace }}/V2rayNG/app/build.gradle.kts
 
+    # ── 3. libtun2socks（仅 arm64-v8a，缓存 key 带 ABI）──────────────────────
     - name: Restore cached libtun2socks
       id: cache-libtun2socks-restore
       uses: actions/cache/restore@v4
       with:
         path: ${{ github.workspace }}/libs
-        key: libtun2socks-${{ runner.os }}-${{ env.NDK_HOME }}-${{ hashFiles('.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('.git/modules/badvpn/HEAD') }}-${{ hashFiles('.git/modules/libancillary/HEAD') }}-${{ hashFiles('compile-tun2socks.sh') }}--${{ hashFiles('compile-hevtun.sh') }}
+        key: libtun2socks-${{ runner.os }}-${{ env.NDK_VERSION }}-${{ env.BUILD_ABI }}-${{ hashFiles('.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('.git/modules/badvpn/HEAD') }}-${{ hashFiles('.git/modules/libancillary/HEAD') }}-${{ hashFiles('compile-tun2socks.sh') }}-${{ hashFiles('compile-hevtun.sh') }}
 
     - name: Build libtun2socks
       if: steps.cache-libtun2socks-restore.outputs.cache-hit != 'true'
-      run: |
-        bash compile-tun2socks.sh && bash compile-hevtun.sh
+      env:
+        BUILD_ABI: ${{ env.BUILD_ABI }}
+      run: bash compile-tun2socks.sh && bash compile-hevtun.sh
     
     - name: Save libtun2socks
       if: steps.cache-libtun2socks-restore.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
         path: ${{ github.workspace }}/libs
-        key: libtun2socks-${{ runner.os }}-${{ env.NDK_HOME }}-${{ hashFiles('.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('.git/modules/badvpn/HEAD') }}-${{ hashFiles('.git/modules/libancillary/HEAD') }}-${{ hashFiles('compile-tun2socks.sh') }}--${{ hashFiles('compile-hevtun.sh') }}
+        key: libtun2socks-${{ runner.os }}-${{ env.NDK_VERSION }}-${{ env.BUILD_ABI }}-${{ hashFiles('.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('.git/modules/badvpn/HEAD') }}-${{ hashFiles('.git/modules/libancillary/HEAD') }}-${{ hashFiles('compile-tun2socks.sh') }}-${{ hashFiles('compile-hevtun.sh') }}
 
     - name: Copy libtun2socks
-      run: |
-        cp -r ${{ github.workspace }}/libs ${{ github.workspace }}/V2rayNG/app
+      run: cp -r ${{ github.workspace }}/libs ${{ github.workspace }}/V2rayNG/app
 
+    # ── 4. libv2ray AAR（直接下载，无需编译）──────────────────────────────────
     - name: Download libv2ray
       uses: robinraju/release-downloader@v1.12
       with:
@@ -75,12 +83,13 @@ jobs:
         fileName: 'libv2ray.aar'
         out-file-path: V2rayNG/app/libs/
 
+    # ── 5. libhysteria2（仅 arm64-v8a，缓存 key 带 ABI）─────────────────────
     - name: Restore cached libhysteria2
       id: cache-libhysteria2-restore
       uses: actions/cache/restore@v4
       with:
         path: ${{ github.workspace }}/hysteria/libs
-        key: libhysteria2-${{ runner.os }}-${{ env.NDK_HOME }}-${{ hashFiles('.git/modules/hysteria/HEAD') }}-${{ hashFiles('libhysteria2.sh') }}
+        key: libhysteria2-${{ runner.os }}-${{ env.NDK_VERSION }}-${{ env.BUILD_ABI }}-${{ hashFiles('.git/modules/hysteria/HEAD') }}-${{ hashFiles('libhysteria2.sh') }}
 
     - name: Setup Golang
       if: steps.cache-libhysteria2-restore.outputs.cache-hit != 'true'
@@ -91,27 +100,38 @@ jobs:
 
     - name: Build libhysteria2
       if: steps.cache-libhysteria2-restore.outputs.cache-hit != 'true'
-      run: |
-        bash libhysteria2.sh
+      env:
+        BUILD_ABI: ${{ env.BUILD_ABI }}
+      run: bash libhysteria2.sh
 
     - name: Save libhysteria2
       if: steps.cache-libhysteria2-restore.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
         path: ${{ github.workspace }}/hysteria/libs
-        key: libhysteria2-${{ runner.os }}-${{ env.NDK_HOME }}-${{ hashFiles('.git/modules/hysteria/HEAD') }}-${{ hashFiles('libhysteria2.sh') }}
+        key: libhysteria2-${{ runner.os }}-${{ env.NDK_VERSION }}-${{ env.BUILD_ABI }}-${{ hashFiles('.git/modules/hysteria/HEAD') }}-${{ hashFiles('libhysteria2.sh') }}
 
     - name: Copy libhysteria2
-      run: |
-        cp -r ${{ github.workspace }}/hysteria/libs ${{ github.workspace }}/V2rayNG/app
+      run: cp -r ${{ github.workspace }}/hysteria/libs ${{ github.workspace }}/V2rayNG/app
 
+    # ── 6. Java + Gradle 缓存 ─────────────────────────────────────────────────
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '21'
 
-    # ── 从 Tag 解析版本号 ──────────────────────────────────────────────────────
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
+
+    # ── 7. 解析版本号 ──────────────────────────────────────────────────────────
     - name: Extract version from tag
       id: version
       run: |
@@ -120,6 +140,7 @@ jobs:
         echo "tag=$TAG"         >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+    # ── 8. 签名 & 构建 ─────────────────────────────────────────────────────────
     - name: Decode Keystore
       run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/release.jks
 
@@ -133,8 +154,10 @@ jobs:
         cd ${{ github.workspace }}/V2rayNG
         echo "sdk.dir=${ANDROID_HOME}" > local.properties
         chmod 755 gradlew
-        # assemblePlaystoreRelease: applicationId=com.v2ray.ang, suitable for direct sideload install
-        ./gradlew assemblePlaystoreRelease -PABI_FILTERS=arm64-v8a \
+        ./gradlew assemblePlaystoreRelease \
+          -PABI_FILTERS=${{ env.BUILD_ABI }} \
+          --no-daemon \
+          --build-cache \
           -Pandroid.injected.signing.store.file="$KEYSTORE_FILE" \
           -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
           -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
@@ -144,16 +167,20 @@ jobs:
       if: always()
       run: rm -f $GITHUB_WORKSPACE/release.jks
 
-    # ── 整理产物 ───────────────────────────────────────────────────────────────
+    # ── 9. 整理产物 ────────────────────────────────────────────────────────────
     - name: Collect APK artifacts
       run: |
         mkdir -p artifacts
-        find ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/playstore/release -name "*arm64-v8a*.apk" | while read f; do
+        find ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/playstore/release \
+          -name "*arm64-v8a*.apk" | while read f; do
           cp "$f" "artifacts/$(basename "$f" .apk)-${{ steps.version.outputs.tag }}.apk"
         done
         ls -lh artifacts/
 
-    # ── 生成 Changelog ────────────────────────────────────────────────────────
+    # ── 10. Changelog（浅克隆下用 tag 范围）──────────────────────────────────
+    - name: Fetch tags for changelog
+      run: git fetch --tags --depth=100
+
     - name: Generate Changelog
       id: changelog
       run: |
@@ -167,7 +194,7 @@ jobs:
         echo "$LOG"           >> $GITHUB_OUTPUT
         echo "EOF"            >> $GITHUB_OUTPUT
 
-    # ── 发布 GitHub Release ────────────────────────────────────────────────────
+    # ── 11. 发布 GitHub Release ────────────────────────────────────────────────
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
