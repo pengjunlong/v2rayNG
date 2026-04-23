@@ -12,6 +12,8 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -428,6 +430,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             true
         }
 
+        R.id.fast_node_settings -> {
+            showFastNodeSettingsDialog()
+            true
+        }
+
         R.id.fab -> {
             if (mainViewModel.isRunning.value == true) {
                 V2RayServiceManager.stopVService(this)
@@ -640,6 +647,59 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             V2RayServiceManager.stopVService(this)
         }
         finishAffinity()
+    }
+
+    /**
+     * 弹出对话框，允许用户配置早停参数：
+     *  - 快节点目标数量（默认 DEFAULT_FAST_NODE_TARGET）
+     *  - 快节点延迟阈值 ms（默认 DEFAULT_FAST_DELAY_THRESHOLD）
+     * 配置持久化到 MMKV，下次批量测试时生效。
+     */
+    private fun showFastNodeSettingsDialog() {
+        val currentTarget = MmkvManager.decodeSettingsString(AppConfig.PREF_FAST_NODE_TARGET)
+            ?.toIntOrNull() ?: AppConfig.DEFAULT_FAST_NODE_TARGET
+        val currentThreshold = MmkvManager.decodeSettingsString(AppConfig.PREF_FAST_DELAY_THRESHOLD)
+            ?.toIntOrNull() ?: AppConfig.DEFAULT_FAST_DELAY_THRESHOLD
+
+        val etTarget = EditText(this).apply {
+            hint = getString(R.string.label_fast_node_target, AppConfig.DEFAULT_FAST_NODE_TARGET)
+            setText(currentTarget.toString())
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            isFocusable = true
+            isFocusableInTouchMode = true
+        }
+        val etThreshold = EditText(this).apply {
+            hint = getString(R.string.label_fast_delay_threshold, AppConfig.DEFAULT_FAST_DELAY_THRESHOLD)
+            setText(currentThreshold.toString())
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            isFocusable = true
+            isFocusableInTouchMode = true
+        }
+
+        val dp8 = (8 * resources.displayMetrics.density).toInt()
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp8 * 3, dp8, dp8 * 3, dp8)
+            addView(etTarget)
+            addView(etThreshold)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.title_fast_node_settings_dialog)
+            .setView(container)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val target = etTarget.text.toString().toIntOrNull()
+                val threshold = etThreshold.text.toString().toIntOrNull()
+                if (target == null || target <= 0 || threshold == null || threshold <= 0) {
+                    toast(getString(R.string.toast_fast_node_settings_invalid))
+                    return@setPositiveButton
+                }
+                MmkvManager.encodeSettings(AppConfig.PREF_FAST_NODE_TARGET, target.toString())
+                MmkvManager.encodeSettings(AppConfig.PREF_FAST_DELAY_THRESHOLD, threshold.toString())
+                toast(getString(R.string.toast_fast_node_settings_saved, target, threshold))
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     /**

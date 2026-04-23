@@ -23,6 +23,10 @@
         android:title="@string/title_exit_app"
         app:showAsAction="never" />
     <item
+        android:id="@+id/fast_node_settings"
+        android:title="@string/title_fast_node_settings"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/sub_update"
         android:title="@string/title_sub_update"
         app:showAsAction="never" />

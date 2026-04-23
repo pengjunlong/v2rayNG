@@ -36,12 +36,6 @@ class V2RayTestService : Service() {
     companion object {
         /** Max concurrent native ping calls. */
         const val CONCURRENCY = 8
-
-        /** Delay threshold (ms) below which a node is considered "fast". */
-        const val FAST_DELAY_THRESHOLD_MS = 300L
-
-        /** Number of fast nodes that triggers early stop. */
-        const val FAST_NODE_TARGET = 20
     }
 
     override fun onCreate() {
@@ -84,6 +78,11 @@ class V2RayTestService : Service() {
         val doneCount = AtomicInteger(0)
         val fastCount = AtomicInteger(0)
         val total = guids.size
+        // 从 MMKV 读取用户配置，未设置时使用默认值
+        val fastDelayThresholdMs = MmkvManager.decodeSettingsString(AppConfig.PREF_FAST_DELAY_THRESHOLD)
+            ?.toIntOrNull()?.toLong() ?: AppConfig.DEFAULT_FAST_DELAY_THRESHOLD.toLong()
+        val fastNodeTarget = MmkvManager.decodeSettingsString(AppConfig.PREF_FAST_NODE_TARGET)
+            ?.toIntOrNull() ?: AppConfig.DEFAULT_FAST_NODE_TARGET
 
         val jobs = guids.map { guid ->
             batchScope.launch {
@@ -99,8 +98,8 @@ class V2RayTestService : Service() {
                     MessageUtil.sendMsg2UI(this@V2RayTestService, MSG_MEASURE_CONFIG_SUCCESS, Pair(guid, result))
 
                     // 统计快节点，达标时设置 earlyStop
-                    if (result in 1..FAST_DELAY_THRESHOLD_MS) {
-                        if (fastCount.incrementAndGet() >= FAST_NODE_TARGET) {
+                    if (result in 1..fastDelayThresholdMs) {
+                        if (fastCount.incrementAndGet() >= fastNodeTarget) {
                             earlyStop.set(true)
                         }
                     }

@@ -67,6 +67,14 @@ object AppConfig {
     const val PREF_HEV_TUNNEL_LOGLEVEL = "pref_hev_tunnel_loglevel"
     const val PREF_HEV_TUNNEL_RW_TIMEOUT = "pref_hev_tunnel_rw_timeout_v2"
 
+    /** TV Early-Stop: 快节点目标数量（达到该数量后停止测试），默认 20 */
+    const val PREF_FAST_NODE_TARGET = "pref_fast_node_target"
+    const val DEFAULT_FAST_NODE_TARGET = 20
+
+    /** TV Early-Stop: 快节点延迟阈值（ms），低于该值视为快节点，默认 300ms */
+    const val PREF_FAST_DELAY_THRESHOLD = "pref_fast_delay_threshold"
+    const val DEFAULT_FAST_DELAY_THRESHOLD = 300
+
     /** Cache keys. */
     const val CACHE_SUBSCRIPTION_ID = "cache_subscription_id"
     const val CACHE_KEYWORD_FILTER = "cache_keyword_filter"

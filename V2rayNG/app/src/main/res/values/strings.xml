@@ -303,6 +303,12 @@
     <string name="title_sub_update">Update subscription</string>
     <string name="title_sub_update_and_test_and_sort">Update, test &amp; sort</string>
     <string name="title_exit_app">Exit</string>
+    <string name="title_fast_node_settings">Fast-node test settings</string>
+    <string name="title_fast_node_settings_dialog">Early-Stop Settings</string>
+    <string name="label_fast_node_target">Fast-node target count (default %d)</string>
+    <string name="label_fast_delay_threshold">Fast-node delay threshold ms (default %d)</string>
+    <string name="toast_fast_node_settings_saved">Settings saved: target=%d, threshold=%dms</string>
+    <string name="toast_fast_node_settings_invalid">Invalid input, please enter positive integers</string>
     <string name="toast_sub_update_and_test_and_sort_start">Updating subscription, will then test and sort…</string>
     <string name="toast_sub_update_done_testing">Subscription updated, starting real-delay test…</string>
     <string name="toast_sort_done">Sorted by test results</string>
