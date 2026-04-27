@@ -104,6 +104,10 @@ android {
             val versionCodes =
                 mapOf("armeabi-v7a" to 4, "arm64-v8a" to 4, "x86" to 4, "x86_64" to 4, "universal" to 4)
 
+            // CI 下 GITHUB_REF_NAME 为 tag（如 v1.10.32），本地构建回退到 versionName
+            val apkVersion = System.getenv("GITHUB_REF_NAME")?.takeIf { it.isNotBlank() }
+                ?: variant.versionName
+
             variant.outputs
                 .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
                 .forEach { output ->
@@ -112,7 +116,7 @@ android {
                     else
                         "universal"
 
-                    output.outputFileName = "v2rayNG_${variant.versionName}_${abi}.apk"
+                    output.outputFileName = "v2rayNG_${apkVersion}_${abi}.apk"
                     if (versionCodes.containsKey(abi)) {
                         output.versionCodeOverride =
                             (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
