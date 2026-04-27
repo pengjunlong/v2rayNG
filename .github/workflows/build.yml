@@ -141,6 +141,12 @@ jobs:
         echo "tag=$TAG"         >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+    # ── 用 tag 版本号覆盖 versionName（不修改代码库，仅影响本次构建产物）──────
+    - name: Patch versionName from tag
+      run: |
+        sed -i 's/versionName = "[^"]*"/versionName = "${{ steps.version.outputs.version }}"/' \
+          ${{ github.workspace }}/V2rayNG/app/build.gradle.kts
+
     - name: Decode Keystore
       run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/release.jks
 
