@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 溢出菜单 / PopupMenu 条目 TV 焦点高亮 -->
+<!-- ListView 遥控器导航用 state_selected；普通 View 用 state_focused -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 聚焦：橙色实心背景，在深色弹出菜单背景上清晰可见 -->
-    <item android:state_focused="true" android:state_pressed="false">
+    <!-- 按下（最高优先级） -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#f97910" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    <!-- ListView 遥控器导航选中（state_selected，Android 6 兼容） -->
+    <item android:state_selected="true">
         <shape android:shape="rectangle">
             <solid android:color="#CCf97910" />
             <stroke android:width="2dp" android:color="#f97910" />
             <corners android:radius="4dp" />
         </shape>
     </item>
-    <item android:state_pressed="true">
+    <!-- 普通 View 聚焦（state_focused） -->
+    <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="#f97910" />
+            <solid android:color="#CCf97910" />
+            <stroke android:width="2dp" android:color="#f97910" />
             <corners android:radius="4dp" />
         </shape>
     </item>

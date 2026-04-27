@@ -32,6 +32,9 @@
         <!-- TV: 溢出菜单弹出层条目焦点样式 -->
         <item name="popupMenuStyle">@style/TvPopupMenuStyle</item>
         <item name="listPopupWindowStyle">@style/TvPopupMenuStyle</item>
+        <!-- TV: 下拉列表条目选中高亮（Android 6 兼容） -->
+        <item name="android:listChoiceBackgroundIndicator">@drawable/bg_popup_menu_item_focus</item>
+        <item name="dropDownListViewStyle">@style/TvDropDownListStyle</item>
     </style>
 
     <!-- TV: 右侧三点溢出按钮 -->
@@ -51,6 +54,12 @@
     <!-- TV: 溢出菜单弹出层，条目背景使用 bg_popup_menu_item_focus -->
     <style name="TvPopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
         <item name="android:itemBackground">@drawable/bg_popup_menu_item_focus</item>
+    </style>
+
+    <!-- TV: 溢出菜单下拉列表，listChoiceBackgroundIndicator 控制遥控器选中高亮 -->
+    <style name="TvDropDownListStyle" parent="Widget.AppCompat.ListView.DropDown">
+        <item name="android:listSelector">@drawable/bg_popup_menu_item_focus</item>
+        <item name="android:listChoiceBackgroundIndicator">@drawable/bg_popup_menu_item_focus</item>
     </style>
 
     <!-- Base application theme. -->

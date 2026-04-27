@@ -21,6 +21,12 @@
         <item name="actionOverflowButtonStyle">@style/TvOverflowButtonStyle</item>
         <!-- TV: 左侧汉堡/返回按钮焦点样式 -->
         <item name="toolbarNavigationButtonStyle">@style/TvToolbarNavButtonStyle</item>
+        <!-- TV: 溢出菜单弹出层条目焦点样式 -->
+        <item name="popupMenuStyle">@style/TvPopupMenuStyle</item>
+        <item name="listPopupWindowStyle">@style/TvPopupMenuStyle</item>
+        <!-- TV: 下拉列表条目选中高亮（Android 6 兼容） -->
+        <item name="android:listChoiceBackgroundIndicator">@drawable/bg_popup_menu_item_focus</item>
+        <item name="dropDownListViewStyle">@style/TvDropDownListStyle</item>
     </style>
 
 </resources>
