@@ -24,7 +24,9 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <!-- TV: Toolbar action items (search, play/stop, add…) focus highlight -->
+        <!-- actionBarItemBackground: 文字菜单项背景；actionButtonStyle: 图标按钮背景 -->
         <item name="actionBarItemBackground">@drawable/bg_toolbar_item_focus</item>
+        <item name="actionButtonStyle">@style/TvActionButtonStyle</item>
         <!-- TV: 右侧三点溢出按钮焦点样式 -->
         <item name="actionOverflowButtonStyle">@style/TvOverflowButtonStyle</item>
         <!-- TV: 左侧汉堡/返回按钮焦点样式 -->
@@ -35,6 +37,13 @@
         <!-- TV: 下拉列表条目选中高亮（Android 6 兼容） -->
         <item name="android:listChoiceBackgroundIndicator">@drawable/bg_popup_menu_item_focus</item>
         <item name="dropDownListViewStyle">@style/TvDropDownListStyle</item>
+    </style>
+
+    <!-- TV: Toolbar 图标按钮（showAsAction=always 的 icon 按钮，如搜索、启停） -->
+    <style name="TvActionButtonStyle" parent="Widget.AppCompat.ActionButton">
+        <item name="android:background">@drawable/bg_toolbar_item_focus</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
     </style>
 
     <!-- TV: 右侧三点溢出按钮 -->
