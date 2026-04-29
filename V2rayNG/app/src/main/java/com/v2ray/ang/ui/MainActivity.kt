@@ -208,6 +208,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     setIcon(R.drawable.ic_play_24dp)
                     title = getString(R.string.tasker_start_service)
                 }
+                // 未聚焦橙色 / 聚焦&按下白色（与橙色高亮背景形成对比）
+                iconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.color_toolbar_icon_tint)
             }
             // 底部栏背景色：绿=运行，红=停止
             binding.bottomBar.setBackgroundColor(
